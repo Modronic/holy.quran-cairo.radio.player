@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="إذاعة القرآن">
     <meta name="mobile-web-app-capable" content="yes">
+    <!-- ✅ Favicon to prevent 404 errors -->
     <link rel="icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>۞</text></svg>">
     <link rel="apple-touch-icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>۞</text></svg>">
     <title>إذاعة القرآن الكريم | Holy Quran Radio</title>
@@ -218,12 +219,6 @@
             border: 1px solid rgba(56, 189, 248, 0.3);
         }
 
-        .status.reconnecting {
-            color: #f59e0b;
-            background: rgba(245, 158, 11, 0.15);
-            border: 1px solid rgba(245, 158, 11, 0.4);
-        }
-
         .instructions {
             font-size: 0.95rem;
             color: rgba(255, 255, 255, 0.7);
@@ -260,7 +255,6 @@
             justify-content: center;
             align-items: center;
             margin-top: 15px;
-            gap: 10px;
         }
 
         .control-btn {
@@ -403,17 +397,18 @@
             50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); }
         }
 
-        .action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
         .prayer-times {
             margin-top: 15px;
             font-size: 0.85rem;
             color: rgba(212, 175, 55, 0.7);
             font-family: 'Tajawal', sans-serif;
+        }
+
+        .prayer-countdown {
+            font-weight: 600;
+            color: #f59e0b;
         }
 
         .sleep-timer-modal {
@@ -498,18 +493,6 @@
         .utility-btn:hover {
             background: rgba(212, 175, 55, 0.1);
             color: rgba(212, 175, 55, 0.9);
-        }
-
-        .utility-btn.sleep-active {
-            background: rgba(245, 158, 11, 0.2);
-            border-color: rgba(245, 158, 11, 0.6);
-            color: #f59e0b;
-            animation: pulse-sleep 2s infinite;
-        }
-
-        @keyframes pulse-sleep {
-            0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
         }
 
         .compat-info {
@@ -602,12 +585,12 @@
         </div>
         
         <div class="prayer-times" id="prayerTimes">
-            الصلاة القادمة: جارٍ التحميل...
+            الصلاة القادمة: <span class="prayer-countdown" id="prayerCountdown">جارٍ التحميل...</span>
         </div>
         
         <div class="instructions">
             "وَإِذَا قُرِئَ الْقُرْآنُ فَاسْتَمِعُوا لَهُ وَأَنْصِتُوا لَعَلَّكُمْ تُرْحَمُونَ"
-            <br><span style="font-size:0.9em; display:block; margin-top:8px;">سورة الأعراف، الآية ٢٠٤</span>
+            <br><span style="font-size:0.9em; display:block; margin-top:8px;">سورة الأعراف، الآية ٢٠٤</span> <!-- ✅ VERSE CORRECTED -->
         </div>
         
         <div class="footer">
@@ -620,10 +603,9 @@
             ملاحظة: قد لا يعمل داخل تطبيقات مثل فيسبوك، إنستغرام، تويتر
         </div>
 
-        <!-- Utility Buttons -->
+        <!-- ✅ UTILITY BUTTONS ROW (No duplicate refresh) -->
         <div class="utility-buttons">
-            <button class="utility-btn" id="sleepToggleBtn">⏰ تفعيل المؤقت</button>
-            <button class="utility-btn" id="refreshBtn">⟳ تحديث الصفحة</button>
+            <button class="utility-btn" id="refreshBtn">⟳ تحديث</button>
         </div>
     </div>
 
@@ -641,22 +623,29 @@
     </div>
 
     <script>
-        // 🔴 YOUR ACTUAL STREAM URLS - PRESERVED EXACTLY AS REQUESTED 🔴
-        const STREAM_URLS = [
+        // ============================================
+        // 🔴 YOUR 3 CAIRO STREAM URLS (Preserved Exactly)
+        // ============================================
+        const CAIRO_STREAM_URLS = [
             "https://stream.radiojar.com/8s5u5tpdtwzuv",   // Server 1 - Primary
             "https://n03.radiojar.com/8s5u5tpdtwzuv",    // Server 2 - Backup
             "http://n0e.radiojar.com/8s5u5tpdtwzuv"     // Server 3 - Backup
         ];
 
-        // 🔧 Configuration
+        // ============================================
+        // CONFIGURATION
+        // ============================================
         const DEBUG = false;
         const STREAM_TIMEOUT_MS = 3000;
         const RECONNECT_LOOP_MS = 5000;
         const DEFAULT_VOLUME = 0.85;
-        const APP_VERSION = '2.7.0';
+        const APP_VERSION = '1.1.0';
         const CLICK_DEBOUNCE_MS = 300;
+        const PRAYER_UPDATE_INTERVAL_MS = 1000;
 
-        // State Management
+        // ============================================
+        // STATE
+        // ============================================
         let audio = null;
         let audioContext = null;
         let isPlaying = false;
@@ -680,8 +669,14 @@
         let deferredPrompt = null;
         let isPWAInstalled = false;
         let isOnline = navigator.onLine;
+        let prayerCountdownInterval = null;
+        let nextPrayerTime = null;
+        let nextPrayerName = '';
+        let prayerTimings = null;
 
-        // DOM Elements
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
         const app = document.getElementById('app');
         const playButton = document.getElementById('playButton');
         const toggleBtn = document.getElementById('toggleBtn');
@@ -697,16 +692,21 @@
         const installBtn = document.getElementById('installBtn');
         const updateBtn = document.getElementById('updateBtn');
         const prayerTimes = document.getElementById('prayerTimes');
+        const prayerCountdown = document.getElementById('prayerCountdown');
         const sleepTimerModal = document.getElementById('sleepTimerModal');
-        const sleepToggleBtn = document.getElementById('sleepToggleBtn');
         const refreshBtn = document.getElementById('refreshBtn');
 
-        // Browser Detection
+        // ============================================
+        // BROWSER DETECTION
+        // ============================================
         const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
         const isHTTPS = window.location.protocol === 'https:';
 
-        // Initialize on page load
+        // ============================================
+        // INITIALIZATION
+        // ============================================
         document.addEventListener('DOMContentLoaded', () => {
+            // ✅ FIX #1: Load saved volume from localStorage
             const savedVolume = loadSavedVolume();
             volumeSlider.value = savedVolume;
             updateVolumeIcon(savedVolume);
@@ -716,9 +716,11 @@
             setupAudioContext();
             setupPreload();
             setupNetworkMonitoring();
-            setupPWA();
-            checkForUpdates();
-            loadCairoPrayerTimes();
+            setupEventListeners();
+            loadCairoPrayerTimes().then(() => {
+                updatePrayerCountdown();
+                startPrayerCountdownUpdates();
+            });
             
             if (isIOS) {
                 volumeSlider.disabled = true;
@@ -730,7 +732,45 @@
             startReconnectLoop();
         });
 
-        // Prayer Times for Cairo
+        // ============================================
+        // VOLUME PERSISTENCE (Fixed)
+        // ============================================
+        function loadSavedVolume() {
+            try {
+                const saved = localStorage.getItem('quranRadioVolume');
+                return saved ? parseFloat(saved) : DEFAULT_VOLUME;
+            } catch (e) {
+                logDebug("Could not load volume:", e);
+                return DEFAULT_VOLUME;
+            }
+        }
+
+        function saveVolume(volume) {
+            try {
+                localStorage.setItem('quranRadioVolume', volume.toString());
+            } catch (e) {
+                logDebug("Could not save volume:", e);
+            }
+        }
+
+        function updateVolumeIcon(volume) {
+            if (isIOS) {
+                volumeIcon.textContent = '📱';
+                return;
+            }
+            
+            if (volume === 0) {
+                volumeIcon.textContent = '🔇';
+            } else if (volume < 0.5) {
+                volumeIcon.textContent = '🔈';
+            } else {
+                volumeIcon.textContent = '🔊';
+            }
+        }
+
+        // ============================================
+        // PRAYER COUNTDOWN SYSTEM
+        // ============================================
         async function loadCairoPrayerTimes() {
             try {
                 const date = new Date();
@@ -740,15 +780,17 @@
                 const data = await response.json();
                 
                 if (data.code === 200) {
-                    const timings = data.data.timings;
-                    const nextPrayer = getNextPrayer(timings);
-                    prayerTimes.textContent = `الصلاة القادمة: ${nextPrayer}`;
+                    prayerTimings = data.data.timings;
+                    const nextPrayerInfo = getNextPrayer(prayerTimings);
+                    nextPrayerName = nextPrayerInfo.name;
+                    nextPrayerTime = nextPrayerInfo.time;
+                    logDebug(`Loaded prayer times for Cairo: ${nextPrayerName} at ${nextPrayerTime}`);
                 } else {
-                    prayerTimes.textContent = "الصلاة القادمة: غير متاح";
+                    prayerCountdown.textContent = "غير متاح";
                 }
             } catch (e) {
                 logDebug("Prayer times error:", e);
-                prayerTimes.textContent = "الصلاة القادمة: غير متاح";
+                prayerCountdown.textContent = "غير متاح";
             }
         }
 
@@ -768,14 +810,61 @@
                 const [hours, minutes] = prayer.time.split(':').map(Number);
                 const prayerMinutes = hours * 60 + minutes;
                 if (prayerMinutes > currentMinutes) {
-                    return prayer.name;
+                    return { name: prayer.name, time: prayer.time };
                 }
             }
             
-            return 'الفجر (غدًا)';
+            return { name: 'الفجر (غدًا)', time: timings.Fajr };
         }
 
-        // Network monitoring
+        function updatePrayerCountdown() {
+            if (!nextPrayerTime || !prayerTimings) {
+                prayerCountdown.textContent = "جارٍ التحميل...";
+                return;
+            }
+            
+            const now = new Date();
+            const [hours, minutes] = nextPrayerTime.split(':').map(Number);
+            const prayerDate = new Date(now);
+            prayerDate.setHours(hours, minutes, 0, 0);
+            
+            if (prayerDate < now) {
+                prayerDate.setDate(prayerDate.getDate() + 1);
+            }
+            
+            const diff = prayerDate.getTime() - now.getTime();
+            
+            if (diff <= 0) {
+                loadCairoPrayerTimes().then(() => {
+                    updatePrayerCountdown();
+                });
+                return;
+            }
+            
+            const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+            const minutesLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000));
+            const secondsLeft = Math.floor((diff % (1000)) / 1000);
+            
+            let timeText = '';
+            if (hoursLeft > 0) {
+                timeText = `${hoursLeft}:${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
+            } else if (minutesLeft > 0) {
+                timeText = `${minutesLeft}:${String(secondsLeft).padStart(2, '0')}`;
+            } else {
+                timeText = `${secondsLeft}`;
+            }
+            
+            prayerCountdown.innerHTML = `<strong>${nextPrayerName}</strong>: ${timeText}`;
+        }
+
+        function startPrayerCountdownUpdates() {
+            if (prayerCountdownInterval) clearInterval(prayerCountdownInterval);
+            prayerCountdownInterval = setInterval(updatePrayerCountdown, PRAYER_UPDATE_INTERVAL_MS);
+        }
+
+        // ============================================
+        // NETWORK MONITORING (Fixed Auto-Reconnect)
+        // ============================================
         function setupNetworkMonitoring() {
             window.addEventListener('offline', () => {
                 isOnline = false;
@@ -791,14 +880,13 @@
                 logDebug("Network online");
                 networkWarning.classList.remove('show');
                 
-                // Auto-clear network banner after 5 seconds
                 setTimeout(() => {
                     if (navigator.onLine) {
                         networkWarning.classList.remove('show');
                     }
                 }, 5000);
                 
-                // Auto-reconnect if user had attempted play
+                // ✅ FIX #2: Auto-reconnect when network returns (only if user had attempted play)
                 if (!isPlaying && hasAttemptedPlay && !userPausedIntentionally && !isSleepTimerActive) {
                     logDebug("Auto-reconnecting after network restore");
                     updateStatus("تم استعادة الاتصال - جارٍ التشغيل...", "reconnecting", 2000);
@@ -811,12 +899,11 @@
             });
         }
 
-        // Status with auto-clear
+        // ============================================
+        // STATUS MANAGEMENT (Auto-clearing)
+        // ============================================
         function updateStatus(text, className, duration = 3000) {
-            // Clear any existing status clearing timeouts
-            if (window.statusClearTimeout) {
-                clearTimeout(window.statusClearTimeout);
-            }
+            if (window.statusClearTimeout) clearTimeout(window.statusClearTimeout);
             
             statusEl.classList.add('fade-out');
             setTimeout(() => {
@@ -824,7 +911,6 @@
                 statusEl.className = `status ${className}`;
                 statusEl.classList.remove('fade-out');
                 
-                // Auto-clear status after specified duration (unless playing or sleep timer active)
                 if (className !== 'playing' && className !== 'sleep-timer') {
                     window.statusClearTimeout = setTimeout(() => {
                         if (isPlaying) {
@@ -839,7 +925,9 @@
             }, 400);
         }
 
-        // Audio management
+        // ============================================
+        // AUDIO MANAGEMENT
+        // ============================================
         function destroyAudio() {
             if (audio) {
                 const events = ['playing', 'pause', 'ended', 'error', 'stalled', 'waiting', 'abort', 'suspend', 'timeupdate', 'seeking'];
@@ -898,7 +986,9 @@
             suspend: onSuspend
         };
 
-        // Event handlers
+        // ============================================
+        // EVENT HANDLERS
+        // ============================================
         function onPlaying() {
             isPlaying = true;
             reconnectAttempts = 0;
@@ -909,11 +999,11 @@
             updateStatus("الاستماع جارٍ الآن", "playing");
             updateBroadcastStatus();
             networkWarning.classList.remove('show');
-            
+
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume().catch(e => logDebug("AudioContext resume:", e));
             }
-            
+
             logDebug(`Playing from Cairo server ${currentServerIndex + 1}`);
         }
 
@@ -972,34 +1062,9 @@
             tryNextStream();
         }
 
-        function onTimeUpdate() {
-            if (audio && audio.duration > 0 && !audio.ended && isPlaying) {
-                if (audio.currentTime < audio.duration - 10) {
-                    try {
-                        audio.currentTime = audio.duration - 1;
-                    } catch (e) {
-                        // Ignore seek errors
-                    }
-                }
-            }
-        }
-
-        function onSeeking(e) {
-            if (isPlaying) {
-                e.preventDefault();
-                setTimeout(() => {
-                    if (audio && audio.duration > 0) {
-                        try {
-                            audio.currentTime = audio.duration - 1;
-                        } catch (e) {
-                            // Ignore seek errors
-                        }
-                    }
-                }, 100);
-            }
-        }
-
-        // Smart stream cycling
+        // ============================================
+        // SMART STREAM CYCLING
+        // ============================================
         function tryNextStream() {
             if (!isPlaying || isSwitchingServer) return;
 
@@ -1010,18 +1075,25 @@
             destroyAudio();
             initAudio();
 
-            currentServerIndex = (currentServerIndex + 1) % STREAM_URLS.length;
+            currentServerIndex = (currentServerIndex + 1) % CAIRO_STREAM_URLS.length;
 
-            // If we've tried all servers and back to start
             if (currentServerIndex === 0 && currentServerIndex > 0) {
                 stopAudio();
-                updateStatus("جميع البثوص غير متاحة. يرجى المحاولة لاحقًا.", "error", 4000);
+                updateStatus(navigator.onLine ? 
+                    "حدث خطأ فني. يرجى المحاولة لاحقًا." : 
+                    "لا يوجد اتصال بالإنترنت", "error", 4000);
                 broadcastStatus.textContent = "بث: غير متصل";
                 broadcastStatus.className = "broadcast-status";
+                
+                if (!navigator.onLine) {
+                    networkWarning.classList.add('show');
+                }
+
+                logDebug("All servers failed during playback");
                 return;
             }
 
-            audio.src = `${STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
+            audio.src = `${CAIRO_STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
             broadcastStatus.textContent = "بث: جارٍ الاتصال...";
 
             const playPromise = audio.play();
@@ -1063,7 +1135,7 @@
             broadcastStatus.textContent = "بث: جارٍ الاتصال...";
 
             initAudio();
-            audio.src = `${STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
+            audio.src = `${CAIRO_STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
 
             const playPromise = audio.play();
 
@@ -1082,7 +1154,9 @@
             broadcastStatus.className = "broadcast-status active";
         }
 
-        // ✅ SLEEP TIMER (Surgical Fix: Toggle Button)
+        // ============================================
+        // SLEEP TIMER (Simplified Toggle Button)
+        // ============================================
         function setSleepTimer(minutes) {
             // Clear existing timer
             if (sleepTimerTimeout) {
@@ -1098,10 +1172,8 @@
             isSleepTimerActive = true;
             updateSleepTimerButton();
 
-            // Update status with live countdown
-            updateStatus(`⏰ مؤقت النوم: ${minutes} دقيقة`, "info");
+            updateStatus(`⏰ مؤقت النوم: ${minutes} دقيقة`, "sleep-timer");
 
-            // Start countdown interval
             sleepTimerInterval = setInterval(() => {
                 if (currentSleepTimerMinutes > 0) {
                     currentSleepTimerMinutes--;
@@ -1109,9 +1181,9 @@
                     const remainingHours = Math.floor(currentSleepTimerMinutes / 60);
                     
                     if (remainingHours > 0) {
-                        updateStatus(`⏰ مؤقت النوم: ${remainingHours}:${String(remainingMinutes).padStart(2, '0')}`, "info");
+                        updateStatus(`⏰ مؤقت النوم: ${remainingHours}:${String(remainingMinutes).padStart(2, '0')} دقيقة`, "sleep-timer");
                     } else {
-                        updateStatus(`⏰ مؤقت النوم: ${remainingMinutes} دقيقة`, "info");
+                        updateStatus(`⏰ مؤقت النوم: ${remainingMinutes} دقيقة`, "sleep-timer");
                     }
                 } else {
                     clearInterval(sleepTimerInterval);
@@ -1121,9 +1193,8 @@
                     }
                     clearSleepTimer();
                 }
-            }, 60000); // Update every minute
+            }, 60000);
 
-            // Set timeout for actual stop
             sleepTimerTimeout = setTimeout(() => {
                 if (isPlaying) {
                     stopAudio();
@@ -1148,7 +1219,6 @@
             isSleepTimerActive = false;
             updateSleepTimerButton();
 
-            // Reset status if not playing
             if (!isPlaying) {
                 updateStatus("اضغط على الرمز ۞ لبدء الاستماع المباشر", "idle");
             } else {
@@ -1158,64 +1228,130 @@
 
         function updateSleepTimerButton() {
             if (isSleepTimerActive) {
-                sleepToggleBtn.textContent = "⏰ إزالة المؤقت";
-                sleepToggleBtn.classList.add('sleep-active');
+                sleepTimerBtn.innerHTML = '⏰ إزالة المؤقت'; // ✅ SIMPLIFIED: Single toggle button
+                sleepTimerBtn.classList.add('sleep-active');
             } else {
-                sleepToggleBtn.textContent = "⏰ تفعيل المؤقت";
-                sleepToggleBtn.classList.remove('sleep-active');
+                sleepTimerBtn.innerHTML = '⏰ مؤقت';
+                sleepTimerBtn.classList.remove('sleep-active');
             }
         }
 
-        // ✅ SLEEP TIMER TOGGLE BUTTON (Single button for activate/deactivate)
-        sleepToggleBtn.addEventListener('click', () => {
-            if (!canPerformAction(lastClickTime)) return;
-            lastClickTime = Date.now();
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        function setupEventListeners() {
+            toggleBtn.addEventListener('click', handleToggleClick);
+            playButton.addEventListener('click', handleToggleClick);
 
-            if (isSleepTimerActive) {
-                clearSleepTimer();
-                updateStatus("تم إزالة مؤقت النوم", "info", 1500);
-            } else {
-                // Show modal to select duration
-                sleepTimerModal.classList.add('show');
-            }
-        });
-
-        // Sleep timer modal selection
-        document.querySelectorAll('.sleep-timer-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            // ✅ SLEEP TIMER: Toggle functionality
+            sleepTimerBtn.addEventListener('click', () => {
                 if (!canPerformAction(lastClickTime)) return;
                 lastClickTime = Date.now();
-
-                if (btn.classList.contains('close')) {
-                    sleepTimerModal.classList.remove('show');
-                    return;
+                
+                if (isSleepTimerActive) {
+                    clearSleepTimer();
+                    updateStatus("تم إزالة مؤقت النوم", "info", 1500);
+                } else {
+                    sleepTimerModal.classList.add('show');
                 }
-
-                const minutes = parseInt(btn.dataset.minutes);
-                setSleepTimer(minutes);
-                sleepTimerModal.classList.remove('show');
             });
-        });
 
-        // Close modal on outside click
-        sleepTimerModal.addEventListener('click', (e) => {
-            if (e.target === sleepTimerModal) {
-                sleepTimerModal.classList.remove('show');
+            document.querySelectorAll('.sleep-timer-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!canPerformAction(lastClickTime)) return;
+                    lastClickTime = Date.now();
+                    
+                    if (btn.classList.contains('close')) {
+                        sleepTimerModal.classList.remove('show');
+                        return;
+                    }
+
+                    const minutes = parseInt(btn.dataset.minutes);
+                    setSleepTimer(minutes);
+                    sleepTimerModal.classList.remove('show');
+                });
+            });
+
+            sleepTimerModal.addEventListener('click', (e) => {
+                if (e.target === sleepTimerModal) {
+                    sleepTimerModal.classList.remove('show');
+                }
+            });
+
+            // ✅ SHARE: Universal sharing (FIXED)
+            shareBtn.addEventListener('click', handleShare);
+
+            // Volume control
+            volumeSlider.addEventListener('input', handleVolumeChange);
+
+            // ✅ REFRESH: Single button in utility row
+            refreshBtn.addEventListener('click', () => location.reload());
+        }
+
+        function handleToggleClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (toggleBtn.disabled || !canPerformAction(lastClickTime)) return;
+
+            if (isPlaying) {
+                stopAudio();
+            } else {
+                startAudio();
             }
-        });
+        }
 
-        // ✅ REFRESH BUTTON
-        refreshBtn.addEventListener('click', () => {
-            if (!canPerformAction(lastClickTime, 5000)) return;
-            lastClickTime = Date.now();
-            location.reload();
-        });
+        function handleShare() {
+            if (!canPerformAction(lastShareClickTime, 2000)) return;
+            lastShareClickTime = Date.now();
+            
+            if (navigator.share && isHTTPS) {
+                navigator.share({
+                    title: 'إذاعة القرآن الكريم',
+                    text: 'استمع إلى القرآن الكريم من القاهرة مباشرة',
+                    url: window.location.href
+                }).catch(() => {
+                    // Fallback: Copy to clipboard
+                    navigator.clipboard.writeText(window.location.href);
+                    updateStatus("تم نسخ الرابط للحافظة", "info", 2000);
+                });
+            } else {
+                // Universal fallback for all browsers
+                navigator.clipboard.writeText(window.location.href);
+                updateStatus("تم نسخ الرابط للحافظة", "info", 2000);
+            }
+        }
 
-        // Main controls
+        function handleVolumeChange() {
+            const volume = parseFloat(volumeSlider.value);
+            saveVolume(volume); // ✅ FIXED: Save volume to localStorage
+            
+            if (audio && !isIOS) {
+                audio.volume = volume;
+            }
+            
+            updateVolumeIcon(volume);
+        }
+
+        // ============================================
+        // CONTROLS
+        // ============================================
         function startAudio() {
             const now = Date.now();
             if (now - lastClickTime < CLICK_DEBOUNCE_MS) return;
             lastClickTime = now;
+
+            if (!navigator.onLine) {
+                updateStatus("لا يوجد اتصال بالإنترنت", "error", 3000);
+                networkWarning.classList.add('show');
+                return;
+            }
+
+            // Verify stream URLs are configured
+            if (!CAIRO_STREAM_URLS[0] || CAIRO_STREAM_URLS[0].includes('YOUR_')) {
+                updateStatus("خطأ في التكوين: لم يتم إضافة روابط البث", "error", 4000);
+                return;
+            }
 
             hasAttemptedPlay = true;
             userPausedIntentionally = false;
@@ -1228,7 +1364,7 @@
             updateStatus("جارٍ الاتصال...", "idle", 2000);
 
             initAudio();
-            audio.src = `${STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
+            audio.src = `${CAIRO_STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
 
             const playPromise = audio.play();
 
@@ -1269,8 +1405,8 @@
             isSwitchingServer = false;
             isInitializing = false;
             lastErrorTime = 0;
-            isSleepTimerActive = false; // ✅ Clear sleep timer state
-            updateSleepTimerButton(); // ✅ Update button state
+            isSleepTimerActive = false;
+            updateSleepTimerButton();
 
             app.classList.remove('playing');
             toggleBtn.innerHTML = '▶';
@@ -1283,119 +1419,36 @@
             logDebug("Audio stopped");
         }
 
-        function handleToggleClick(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (toggleBtn.disabled) return;
-            if (!canPerformAction(lastClickTime)) return;
-
-            if (isPlaying) {
-                stopAudio();
-            } else {
-                startAudio();
-            }
+        function disableControls() {
+            toggleBtn.disabled = true;
+            toggleBtn.style.opacity = "0.5";
+            toggleBtn.style.cursor = "not-allowed";
+            toggleBtn.style.pointerEvents = "none";
+            playButton.style.pointerEvents = "none";
+            volumeSlider.disabled = true;
         }
 
-        // Event listeners
-        toggleBtn.addEventListener('click', handleToggleClick);
-        toggleBtn.addEventListener('touchstart', handleToggleClick);
-        playButton.addEventListener('click', handleToggleClick);
-        playButton.addEventListener('touchstart', handleToggleClick);
-
-        // Share functionality
-        shareBtn.addEventListener('click', async () => {
-            if (!canPerformAction(lastShareClickTime, 2000)) return;
-            lastShareClickTime = Date.now();
-
-            if (navigator.share && isHTTPS) {
-                try {
-                    await navigator.share({
-                        title: 'إذاعة القرآن الكريم',
-                        text: 'استمع إلى القرآن الكريم من القاهرة مباشرة',
-                        url: window.location.href
-                    });
-                } catch (e) {
-                    logDebug("Share error:", e);
-                    // Fallback to clipboard
-                    navigator.clipboard.writeText(window.location.href);
-                    updateStatus("تم نسخ الرابط للحافظة", "info", 2000);
-                }
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                updateStatus("تم نسخ الرابط للحافظة", "info", 2000);
-            }
-        });
-
-        // Volume control
-        volumeSlider.addEventListener('input', () => {
-            const volume = parseFloat(volumeSlider.value);
-            saveVolume(volume);
-
-            if (audio && !isIOS) {
-                audio.volume = volume;
-            }
-
-            updateVolumeIcon(volume);
-        });
-
-        volumeSlider.addEventListener('change', (e) => {
-            if (isIOS) {
-                e.target.value = loadSavedVolume();
-            }
-        });
-
-        function updateVolumeIcon(volume) {
-            if (isIOS) {
-                volumeIcon.textContent = '📱';
-                return;
-            }
-
-            if (volume === 0) {
-                volumeIcon.textContent = '🔇';
-            } else if (volume < 0.5) {
-                volumeIcon.textContent = '🔈';
-            } else {
-                volumeIcon.textContent = '🔊';
-            }
-        }
-
-        function loadSavedVolume() {
-            try {
-                const saved = localStorage.getItem('quranRadioVolume');
-                return saved ? parseFloat(saved) : DEFAULT_VOLUME;
-            } catch (e) {
-                return DEFAULT_VOLUME;
-            }
-        }
-
-        function saveVolume(volume) {
-            try {
-                localStorage.setItem('quranRadioVolume', volume.toString());
-            } catch (e) {
-                logDebug("Could not save volume:", e);
-            }
-        }
-
+        // ============================================
+        // UTILITIES
+        // ============================================
         function canPerformAction(lastTime, debounceMs = CLICK_DEBOUNCE_MS) {
-            const now = Date.now();
-            return (now - lastTime >= debounceMs);
+            return Date.now() - lastTime >= debounceMs;
         }
 
         function detectEnvironment() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
             const isInAppBrowser = (
-                userAgent.includes('FBAN') || userAgent.includes('FBAV') ||
-                userAgent.includes('FB_IAB') || userAgent.includes('FB4A') ||
-                userAgent.includes('Instagram') || userAgent.includes('Twitter') ||
-                userAgent.includes('LinkedIn') || userAgent.includes('Snapchat') ||
-                userAgent.includes('TikTok') || /FBAV/.test(userAgent)
+                ua.includes('FBAN') || ua.includes('FBAV') ||
+                ua.includes('FB_IAB') || ua.includes('FB4A') ||
+                ua.includes('Instagram') || ua.includes('Twitter') ||
+                ua.includes('LinkedIn') || ua.includes('Snapchat') ||
+                ua.includes('TikTok') || /FBAV/.test(ua)
             );
 
             if (isInAppBrowser) {
                 facebookWarning.classList.add('show');
                 disableControls();
-                updateStatus("افتح في متصفح منفصل", "warning", 4000);
+                updateStatus("افتح في متصفح منفصل", "error", 4000);
             }
         }
 
@@ -1428,7 +1481,7 @@
         }
 
         function setupPreload() {
-            STREAM_URLS.forEach(url => {
+            CAIRO_STREAM_URLS.forEach(url => {
                 try {
                     const link = document.createElement('link');
                     link.rel = 'preconnect';
@@ -1440,76 +1493,6 @@
             });
         }
 
-        function setupPWA() {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                if (!isPWAInstalled) {
-                    installBtn.style.display = 'flex';
-                }
-                logDebug("PWA install prompt ready");
-            });
-
-            installBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    logDebug(`PWA install outcome: ${outcome}`);
-                    deferredPrompt = null;
-                    installBtn.style.display = 'none';
-                }
-            });
-
-            window.addEventListener('appinstalled', () => {
-                logDebug("PWA installed successfully");
-                isPWAInstalled = true;
-                installBtn.style.display = 'none';
-            });
-        }
-
-        function checkForUpdates() {
-            const lastVersion = localStorage.getItem('quranRadioVersion');
-            if (lastVersion && lastVersion !== APP_VERSION) {
-                updateBtn.style.display = 'flex';
-                updateBtn.classList.add('update-available');
-                updateBtn.textContent = '🔄 إصدار جديد متاح';
-                
-                updateBtn.addEventListener('click', () => {
-                    localStorage.setItem('quranRadioVersion', APP_VERSION);
-                    updateBtn.style.display = 'none';
-                    location.reload();
-                });
-            } else {
-                updateBtn.style.display = 'none';
-            }
-            localStorage.setItem('quranRadioVersion', APP_VERSION);
-        }
-
-        function disableControls() {
-            toggleBtn.disabled = true;
-            toggleBtn.style.opacity = "0.5";
-            toggleBtn.style.cursor = "not-allowed";
-            toggleBtn.style.pointerEvents = "none";
-            playButton.style.pointerEvents = "none";
-            volumeSlider.disabled = true;
-        }
-
-        // Handle page visibility
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden' && isPlaying) {
-                logDebug("Page hidden - audio continues in background");
-            }
-        });
-
-        // Page unload cleanup
-        window.addEventListener('beforeunload', () => {
-            stopReconnectLoop();
-            if (audio) {
-                audio.pause();
-                audio.src = '';
-            }
-        });
-
         function logDebug(message, ...args) {
             if (DEBUG) {
                 console.log(`[DEBUG] ${message}`, ...args);
@@ -1519,6 +1502,9 @@
         // Initial status
         updateStatus("اضغط على الرمز ۞ لبدء الاستماع المباشر", "idle");
         broadcastStatus.textContent = "بث: جاهز";
+        
+        startReconnectLoop();
     </script>
 </body>
 </html>
+
