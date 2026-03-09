@@ -8,24 +8,34 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="إذاعة القرآن">
     <meta name="mobile-web-app-capable" content="yes">
-    <!-- ✅ Favicon to prevent 404 errors -->
-    <link rel="icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>۞</text></svg>">
-    <link rel="apple-touch-icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>۞</text></svg>">
+    <meta name="description" content="استمع إلى إذاعة القرآن الكريم من القاهرة - بث مباشر مجاني">
+    <!-- Open Graph: rich preview on WhatsApp / Facebook / Telegram -->
+    <meta property="og:title"       content="إذاعة القرآن الكريم | Holy Quran Radio">
+    <meta property="og:description" content="استمع إلى القرآن الكريم من القاهرة — بث مباشر مجاني على أي جهاز">
+    <meta property="og:type"        content="website">
+    <meta property="og:locale"      content="ar_EG">
+    <meta name="twitter:card"        content="summary">
+    <meta name="twitter:title"       content="إذاعة القرآن الكريم">
+    <meta name="twitter:description" content="بث مباشر للقرآن الكريم من القاهرة">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>۞</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>۞</text></svg>">
     <title>إذاعة القرآن الكريم | Holy Quran Radio</title>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
-        
+        * { margin:0; padding:0; box-sizing:border-box; touch-action:manipulation; }
+
         body {
             background: radial-gradient(circle at center, #0a0e17 0%, #020408 100%);
             color: #e2e8f0;
             font-family: 'Tajawal', sans-serif;
-            height: 100vh;
+            min-height: 100vh;
             width: 100%;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            padding: 20px 0 50px;
             position: relative;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
@@ -38,43 +48,19 @@
 
         body::before {
             content: "";
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
-                radial-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+            position: fixed;
+            width: 100%; height: 100%;
+            background: radial-gradient(rgba(212,175,55,0.03) 1px, transparent 1px),
+                        radial-gradient(rgba(212,175,55,0.03) 1px, transparent 1px);
             background-size: 40px 40px;
             background-position: 0 0, 20px 20px;
             z-index: 0;
             pointer-events: none;
         }
 
-        .app-container {
-            position: relative;
-            z-index: 10;
-            width: 95%;
-            max-width: 500px;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.25);
-            border-radius: 28px;
-            padding: 45px 35px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 40px rgba(212, 175, 55, 0.15);
-            text-align: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .app-container.playing {
-            border-color: rgba(212, 175, 55, 0.6);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 50px rgba(212, 175, 55, 0.35);
-        }
-
+        /* ── BANNERS ── */
         .warning-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
+            position: fixed; top:0; left:0;
             width: 100%;
             padding: 14px 20px;
             text-align: center;
@@ -85,458 +71,233 @@
             display: none;
             animation: slideDown 0.4s ease;
         }
-
-        .warning-banner.show { display: block; }
-        .warning-banner.facebook { background: rgba(239, 68, 68, 0.95); color: white; }
-        .warning-banner.adblock { background: rgba(245, 158, 11, 0.95); color: #000; }
-        .warning-banner.network { background: rgba(59, 130, 246, 0.95); color: white; }
+        .warning-banner.show  { display: block; }
+        .warning-banner.facebook { background: rgba(239,68,68,0.95); color: white; }
+        .warning-banner.adblock  { background: rgba(245,158,11,0.95); color: #000; }
+        .warning-banner.network  { background: rgba(59,130,246,0.95); color: white; }
         .warning-banner strong { display: block; margin-bottom: 4px; font-weight: 700; }
         .warning-banner a { color: inherit; text-decoration: underline; font-weight: 600; }
 
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .adhan-banner {
+            position: fixed; top:0; left:0;
+            width: 100%;
+            padding: 16px 20px;
+            text-align: center;
+            z-index: 1001;
+            background: linear-gradient(135deg, rgba(212,175,55,0.97), rgba(180,140,30,0.99));
+            color: #000;
+            font-family: 'Amiri', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: none;
+            cursor: pointer;
+            animation: slideDown 0.5s ease;
+        }
+        .adhan-banner.show { display: block; }
+
+        .ios-install-banner {
+            position: fixed; bottom:0; left:0;
+            width: 100%;
+            background: rgba(10,14,23,0.97);
+            border-top: 1px solid rgba(212,175,55,0.35);
+            padding: 16px 24px 28px;
+            text-align: center;
+            z-index: 997;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.82);
+            line-height: 1.7;
+            display: none;
+            animation: slideUp 0.4s ease;
+        }
+        .ios-install-banner.show { display: block; }
+        .ios-install-banner strong { color: #D4AF37; }
+        .ios-dismiss-btn {
+            position: absolute; top:10px; left:14px;
+            background: none; border: none;
+            color: rgba(255,255,255,0.4);
+            font-size: 1.1rem; cursor: pointer;
+            padding: 4px 8px;
         }
 
+        .resume-banner {
+            position: fixed; bottom:0; left:0;
+            width: 100%;
+            background: rgba(10,14,23,0.97);
+            border-top: 1px solid rgba(212,175,55,0.35);
+            padding: 14px 20px 22px;
+            z-index: 996;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.92rem;
+            color: rgba(255,255,255,0.82);
+            animation: slideUp 0.4s ease;
+        }
+        .resume-banner.show { display: flex; }
+        .resume-yes { background: rgba(212,175,55,0.18); border: 1px solid rgba(212,175,55,0.55); color: #D4AF37; padding: 8px 22px; border-radius: 20px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 0.9rem; transition: all 0.2s; }
+        .resume-no  { background: rgba(80,80,80,0.18); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.55); padding: 8px 22px; border-radius: 20px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 0.9rem; transition: all 0.2s; }
+        .resume-yes:hover { background: rgba(212,175,55,0.28); }
+        .resume-no:hover  { background: rgba(80,80,80,0.3); }
+
+        @keyframes slideDown { from{transform:translateY(-100%);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes slideUp   { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+
+        /* ── CARD ── */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            width: 95%;
+            max-width: 500px;
+            background: rgba(15,23,42,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 28px;
+            padding: 45px 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.15);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        .app-container.playing {
+            border-color: rgba(212,175,55,0.6);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 50px rgba(212,175,55,0.35);
+        }
+
+        /* ── SYMBOL ── */
         .symbol-container {
             position: relative;
-            width: 180px;
-            height: 180px;
+            width: 180px; height: 180px;
             margin: 0 auto 35px;
             cursor: pointer;
             transition: transform 0.4s ease;
             -webkit-tap-highlight-color: transparent;
         }
-
         .symbol-container:active { transform: scale(0.95); }
         .symbol-container:hover:not(:active) { transform: scale(1.05); }
-
         .symbol {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
         }
-
-        .circle {
-            position: absolute;
-            border: 2px solid rgba(212, 175, 55, 0.7);
-            border-radius: 50%;
-            transition: all 0.6s ease;
-        }
-
-        .circle-1 { width: 100%; height: 100%; }
-        .circle-2 { width: 85%; height: 85%; }
-        .circle-3 { width: 70%; height: 70%; }
-
-        .symbol-core {
-            font-size: 52px;
-            color: #D4AF37;
-            transition: all 0.5s ease;
-            text-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
-            pointer-events: none;
-        }
-
+        .circle { position: absolute; border: 2px solid rgba(212,175,55,0.7); border-radius: 50%; transition: all 0.6s ease; }
+        .circle-1{width:100%;height:100%} .circle-2{width:85%;height:85%} .circle-3{width:70%;height:70%}
+        .symbol-core { font-size:52px; color:#D4AF37; transition:all 0.5s ease; text-shadow:0 0 15px rgba(212,175,55,0.6); pointer-events:none; }
         .app-container.playing .circle { animation: pulse 3s infinite ease-in-out; }
-        .app-container.playing .circle-1 { animation-delay: 0s; }
-        .app-container.playing .circle-2 { animation-delay: 0.3s; }
-        .app-container.playing .circle-3 { animation-delay: 0.6s; }
+        .app-container.playing .circle-1{animation-delay:0s} .app-container.playing .circle-2{animation-delay:.3s} .app-container.playing .circle-3{animation-delay:.6s}
+        .app-container.playing .symbol-core { animation:breathe 4s infinite ease-in-out; color:#f8f4e6; text-shadow:0 0 25px rgba(255,244,220,0.8); }
+        @keyframes pulse   { 0%,100%{transform:scale(1);opacity:.7} 50%{transform:scale(1.08);opacity:1} }
+        @keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
 
-        .app-container.playing .symbol-core {
-            animation: breathe 4s infinite ease-in-out;
-            color: #f8f4e6;
-            text-shadow: 0 0 25px rgba(255, 244, 220, 0.8);
+        /* ── TITLE ── */
+        .title { font-family:'Amiri',serif; font-size:2.8rem; font-weight:700; background:linear-gradient(45deg,#D4AF37,#f3cf55,#D4AF37); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:10px; letter-spacing:1px; line-height:1.3; }
+        .subtitle { font-family:'Tajawal',sans-serif; font-weight:300; font-size:1.25rem; color:rgba(255,255,255,0.85); margin-bottom:8px; letter-spacing:.5px; }
+
+        .date-row { font-size:0.78rem; color:rgba(212,175,55,0.6); font-family:'Tajawal',sans-serif; margin-bottom:22px; }
+        .date-row span { margin: 0 5px; }
+
+        /* ── STATUS ── */
+        .status { min-height:28px; font-size:1.05rem; font-family:'Amiri',serif; margin:0 0 22px; padding:8px 20px; border-radius:20px; background:rgba(30,41,59,0.7); transition:opacity .4s ease,transform .4s ease; opacity:1; transform:translateY(0); }
+        .status.fade-out { opacity:0; transform:translateY(-10px); }
+        .status.idle         { color:rgba(255,255,255,0.6); border:1px dashed rgba(212,175,55,0.3); }
+        .status.playing      { color:#D4AF37; background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.4); box-shadow:0 0 15px rgba(212,175,55,0.2); }
+        .status.error        { color:#f87171; background:rgba(127,29,29,0.2); border:1px solid rgba(248,113,113,0.4); }
+        .status.info         { color:#38bdf8; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); }
+        .status.reconnecting { color:#a78bfa; background:rgba(124,58,237,0.1); border:1px solid rgba(124,58,237,0.3); }
+
+        /* ── CONTROLS ── */
+        .controls-container { display:flex; justify-content:center; align-items:center; margin-top:15px; }
+        .control-btn { width:75px;height:75px; border-radius:50%; background:rgba(30,41,59,0.8); border:2px solid rgba(212,175,55,0.4); color:#D4AF37; font-size:1.8rem; cursor:pointer; transition:all .3s ease; display:flex; justify-content:center; align-items:center; box-shadow:0 4px 15px rgba(0,0,0,0.3); font-family:'Tajawal',sans-serif; font-weight:600; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; outline:none; }
+        .control-btn:hover { background:rgba(212,175,55,0.15); transform:scale(1.1); border-color:rgba(212,175,55,0.7); }
+        .control-btn:active { transform:scale(0.95); }
+        .control-btn.stop { background:rgba(153,27,27,0.2); border-color:rgba(239,68,68,0.5); color:#ef4444; }
+        .control-btn.stop:hover { background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.7); }
+        .control-btn:disabled { opacity:.5; cursor:not-allowed; pointer-events:none; }
+
+        /* ── VOLUME ── */
+        .volume-container { display:flex; align-items:center; gap:12px; margin-top:22px; width:100%; max-width:320px; margin-left:auto; margin-right:auto; }
+        .volume-icon { color:#D4AF37; font-size:1.4rem; min-width:28px; text-align:center; }
+        .volume-slider { width:100%; height:6px; -webkit-appearance:none; appearance:none; background:rgba(255,255,255,0.1); border-radius:3px; outline:none; transition:all .3s ease; -webkit-tap-highlight-color:transparent; }
+        .volume-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:20px;height:20px; border-radius:50%; background:#D4AF37; cursor:pointer; box-shadow:0 0 10px rgba(212,175,55,0.7); transition:all .2s ease; }
+        .volume-slider::-webkit-slider-thumb:hover  { transform:scale(1.25); background:#f3cf55; }
+        .volume-slider::-webkit-slider-thumb:active { transform:scale(1.3); }
+        .volume-slider::-moz-range-thumb { width:20px;height:20px; border-radius:50%; background:#D4AF37; cursor:pointer; border:none; box-shadow:0 0 10px rgba(212,175,55,0.7); }
+
+        /* ── ACTION BUTTONS ── */
+        .action-buttons { display:flex; justify-content:center; gap:10px; margin-top:18px; flex-wrap:wrap; }
+        .action-btn { background:rgba(30,41,59,0.8); border:1px solid rgba(212,175,55,0.4); color:#D4AF37; padding:10px 15px; border-radius:20px; cursor:pointer; font-size:0.87rem; font-family:'Tajawal',sans-serif; transition:all .3s ease; display:flex; align-items:center; gap:5px; }
+        .action-btn:hover  { background:rgba(212,175,55,0.15); transform:scale(1.05); }
+        .action-btn:active { transform:scale(0.95); }
+        .action-btn:disabled { opacity:.5; cursor:not-allowed; pointer-events:none; }
+        .action-btn.sleep-active  { background:rgba(245,158,11,0.2); border-color:rgba(245,158,11,0.6); color:#f59e0b; animation:pulse-sleep 2s infinite; }
+        .action-btn.update-available { background:rgba(34,197,94,0.2); border-color:rgba(34,197,94,0.6); color:#22c55e; animation:pulse-update 2s infinite; }
+        @keyframes pulse-sleep  { 0%,100%{box-shadow:0 0 10px rgba(245,158,11,0.3)} 50%{box-shadow:0 0 20px rgba(245,158,11,0.6)} }
+        @keyframes pulse-update { 0%,100%{box-shadow:0 0 10px rgba(34,197,94,0.3)}  50%{box-shadow:0 0 20px rgba(34,197,94,0.6)}  }
+
+        /* ── PRAYER ── */
+        .prayer-times { margin-top:15px; font-size:.85rem; color:rgba(212,175,55,0.7); font-family:'Tajawal',sans-serif; }
+        .prayer-countdown { font-weight:600; color:#f59e0b; }
+        /* ── INSTRUCTIONS ── */
+        .instructions { font-size:.95rem; color:rgba(255,255,255,0.7); margin-top:20px; line-height:1.6; font-style:italic; padding:15px; border-radius:16px; background:rgba(0,0,0,0.25); }
+
+        /* ── FOOTER ── */
+        .footer { margin-top:25px; font-size:.8rem; color:rgba(212,175,55,0.7); font-family:'Tajawal',sans-serif; letter-spacing:1px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1); }
+        .broadcast-row { display:flex; justify-content:center; align-items:center; gap:7px; margin-top:8px; }
+        .health-dot { width:8px;height:8px; border-radius:50%; background:rgba(255,255,255,0.15); flex-shrink:0; transition:background .4s,box-shadow .4s; }
+        .health-dot.green  { background:#22c55e; box-shadow:0 0 7px rgba(34,197,94,0.8); }
+        .health-dot.yellow { background:#f59e0b; box-shadow:0 0 7px rgba(245,158,11,0.8); animation:blink 1s infinite; }
+        .health-dot.red    { background:#ef4444; box-shadow:0 0 6px rgba(239,68,68,0.7); }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+        .broadcast-status { font-size:.65rem; color:rgba(255,255,255,0.4); font-family:'Tajawal',sans-serif; letter-spacing:.5px; }
+        .broadcast-status.active { color:rgba(212,175,55,0.8); }
+
+        /* ── COMPAT / UTILITY ── */
+        .compat-info { margin-top:15px; font-size:.7rem; color:rgba(255,255,255,0.5); font-family:'Tajawal',sans-serif; line-height:1.4; }
+        .utility-buttons { display:flex; justify-content:center; align-items:center; gap:15px; margin-top:22px; }
+        .utility-btn { background:rgba(30,41,59,0.8); border:1px solid rgba(212,175,55,0.3); color:rgba(212,175,55,0.7); padding:8px 16px; border-radius:15px; cursor:pointer; font-size:.8rem; font-family:'Tajawal',sans-serif; transition:all .3s ease; }
+        .utility-btn:hover { background:rgba(212,175,55,0.1); color:rgba(212,175,55,0.9); }
+
+        /* ── SLEEP TIMER MODAL ── */
+        .sleep-timer-modal { position:fixed; top:0;left:0; width:100%;height:100%; background:rgba(0,0,0,0.82); display:none; justify-content:center; align-items:center; z-index:2000; }
+        .sleep-timer-modal.show { display:flex; }
+        .sleep-timer-content { background:rgba(10,14,23,0.97); border:1px solid rgba(212,175,55,0.4); border-radius:22px; padding:30px 28px; text-align:center; max-width:320px; width:90%; }
+        .sleep-timer-content h3 { color:#D4AF37; margin-bottom:6px; font-family:'Amiri',serif; font-size:1.35rem; }
+        .sleep-timer-content p  { color:rgba(255,255,255,0.45); font-size:.8rem; margin-bottom:18px; font-family:'Tajawal',sans-serif; }
+        .sleep-timer-options { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .sleep-timer-btn { background:rgba(30,41,59,0.8); border:1px solid rgba(212,175,55,0.4); color:#D4AF37; padding:13px 10px; border-radius:14px; cursor:pointer; font-family:'Tajawal',sans-serif; font-size:.95rem; transition:all .3s ease; }
+        .sleep-timer-btn:hover { background:rgba(212,175,55,0.15); transform:scale(1.03); }
+        .sleep-timer-btn.close { grid-column:1/-1; background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.35); color:#ef4444; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width:500px) {
+            .app-container { padding:35px 20px; border-radius:24px; }
+            .symbol-container { width:150px;height:150px; }
+            .symbol-core { font-size:44px; }
+            .title { font-size:2.3rem; }
+            .subtitle { font-size:1.1rem; }
+            .control-btn { width:65px;height:65px;font-size:1.6rem; }
+            .volume-container { gap:8px; }
+            .volume-icon { font-size:1.2rem; }
+            .broadcast-status { font-size:.6rem; }
+            .warning-banner { padding:12px 15px;font-size:.85rem; }
+            .compat-info { font-size:.65rem; }
+            .action-buttons { gap:8px; }
+            .action-btn { padding:8px 11px;font-size:.82rem; }
+            .utility-buttons { gap:10px; }
+            .utility-btn { padding:6px 12px;font-size:.75rem; }
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.08); opacity: 1; }
-        }
-
-        @keyframes breathe {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-        }
-
-        .title {
-            font-family: 'Amiri', serif;
-            font-size: 2.8rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #D4AF37, #f3cf55, #D4AF37);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-            line-height: 1.3;
-        }
-
-        .subtitle {
-            font-family: 'Tajawal', sans-serif;
-            font-weight: 300;
-            font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 35px;
-            letter-spacing: 0.5px;
-        }
-
-        .status {
-            min-height: 28px;
-            font-size: 1.05rem;
-            font-family: 'Amiri', serif;
-            margin: 25px 0 25px;
-            padding: 8px 20px;
-            border-radius: 20px;
-            background: rgba(30, 41, 59, 0.7);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .status.fade-out { opacity: 0; transform: translateY(-10px); }
-        .status.idle { color: rgba(255, 255, 255, 0.6); border: 1px dashed rgba(212, 175, 55, 0.3); }
-        .status.playing {
-            color: #D4AF37;
-            background: rgba(212, 175, 55, 0.15);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
-        }
-
-        .status.error {
-            color: #f87171;
-            background: rgba(127, 29, 29, 0.2);
-            border: 1px solid rgba(248, 113, 113, 0.4);
-        }
-
-        .status.info {
-            color: #38bdf8;
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-        }
-
-        .instructions {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 20px;
-            line-height: 1.6;
-            font-style: italic;
-            padding: 15px;
-            border-radius: 16px;
-            background: rgba(0, 0, 0, 0.25);
-        }
-
-        .footer {
-            margin-top: 25px;
-            font-size: 0.8rem;
-            color: rgba(212, 175, 55, 0.7);
-            font-family: 'Tajawal', sans-serif;
-            letter-spacing: 1px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .broadcast-status {
-            margin-top: 8px;
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            font-family: 'Tajawal', sans-serif;
-            letter-spacing: 0.5px;
-        }
-
-        .broadcast-status.active { color: rgba(212, 175, 55, 0.8); }
-
-        .controls-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 15px;
-        }
-
-        .control-btn {
-            width: 75px;
-            height: 75px;
-            border-radius: 50%;
-            background: rgba(30, 41, 59, 0.8);
-            border: 2px solid rgba(212, 175, 55, 0.4);
-            color: #D4AF37;
-            font-size: 1.8rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            font-family: 'Tajawal', sans-serif;
-            font-weight: 600;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-appearance: none;
-            appearance: none;
-            outline: none;
-        }
-
-        .control-btn:hover {
-            background: rgba(212, 175, 55, 0.15);
-            transform: scale(1.1);
-            border-color: rgba(212, 175, 55, 0.7);
-        }
-
-        .control-btn:active { transform: scale(0.95); }
-
-        .control-btn.stop {
-            background: rgba(153, 27, 27, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
-            color: #ef4444;
-        }
-
-        .control-btn.stop:hover {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.7);
-        }
-
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
-
-        .volume-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 30px;
-            width: 100%;
-            max-width: 320px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .volume-icon {
-            color: #D4AF37;
-            font-size: 1.4rem;
-            min-width: 28px;
-            text-align: center;
-        }
-
-        .volume-slider {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            outline: none;
-            transition: all 0.3s ease;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #D4AF37;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
-            transition: all 0.2s ease;
-        }
-
-        .volume-slider::-webkit-slider-thumb:hover { transform: scale(1.25); background: #f3cf55; }
-        .volume-slider::-webkit-slider-thumb:active { transform: scale(1.3); }
-
-        .volume-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #D4AF37;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
-        }
-
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            color: #D4AF37;
-            padding: 10px 18px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .action-btn:hover {
-            background: rgba(212, 175, 55, 0.15);
-            transform: scale(1.05);
-        }
-
-        .action-btn:active { transform: scale(0.95); }
-
-        .action-btn.update-available {
-            background: rgba(34, 197, 94, 0.2);
-            border-color: rgba(34, 197, 94, 0.6);
-            color: #22c55e;
-            animation: pulse-update 2s infinite;
-        }
-
-        @keyframes pulse-update {
-            0%, 100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); }
-        }
-
-        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
-
-        .prayer-times {
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: rgba(212, 175, 55, 0.7);
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        .prayer-countdown {
-            font-weight: 600;
-            color: #f59e0b;
-        }
-
-        .sleep-timer-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .sleep-timer-modal.show { display: flex; }
-
-        .sleep-timer-content {
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            max-width: 320px;
-        }
-
-        .sleep-timer-content h3 {
-            color: #D4AF37;
-            margin-bottom: 20px;
-            font-family: 'Amiri', serif;
-        }
-
-        .sleep-timer-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .sleep-timer-btn {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            color: #D4AF37;
-            padding: 12px 20px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .sleep-timer-btn:hover {
-            background: rgba(212, 175, 55, 0.15);
-            transform: scale(1.05);
-        }
-
-        .sleep-timer-btn.close {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
-            color: #ef4444;
-        }
-
-        .utility-buttons {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .utility-btn {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            color: rgba(212, 175, 55, 0.7);
-            padding: 8px 16px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 0.8rem; /* -1 font size as requested */
-            font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        .utility-btn:hover {
-            background: rgba(212, 175, 55, 0.1);
-            color: rgba(212, 175, 55, 0.9);
-        }
-
-        .compat-info {
-            margin-top: 15px;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.5);
-            font-family: 'Tajawal', sans-serif;
-            line-height: 1.4;
-        }
-
-        @media (max-width: 500px) {
-            .app-container { padding: 35px 25px; border-radius: 24px; }
-            .symbol-container { width: 150px; height: 150px; }
-            .symbol-core { font-size: 44px; }
-            .title { font-size: 2.3rem; }
-            .subtitle { font-size: 1.1rem; }
-            .control-btn { width: 65px; height: 65px; font-size: 1.6rem; }
-            .volume-container { gap: 8px; }
-            .volume-icon { font-size: 1.2rem; }
-            .broadcast-status { font-size: 0.6rem; }
-            .warning-banner { padding: 12px 15px; font-size: 0.85rem; }
-            .compat-info { font-size: 0.65rem; }
-            .action-buttons { gap: 10px; }
-            .action-btn { padding: 8px 15px; font-size: 0.85rem; }
-            .utility-buttons { gap: 10px; }
-            .utility-btn { padding: 6px 12px; font-size: 0.75rem; }
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(212, 175, 55, 0.3);
-            border-radius: 50%;
-            border-top-color: #D4AF37;
-            animation: spin 1s linear infinite;
-            margin-right: 8px;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { display:inline-block; width:20px;height:20px; border:3px solid rgba(212,175,55,0.3); border-radius:50%; border-top-color:#D4AF37; animation:spin 1s linear infinite; margin-right:8px; }
+        @keyframes spin { to { transform:rotate(360deg); } }
     </style>
 </head>
 <body>
-    <!-- Warning Banners -->
+
+    <!-- ── BANNERS ── -->
     <div class="warning-banner facebook" id="facebookWarning">
         <strong>⚠️ تنبيه فيسبوك</strong>
         هذا التطبيق لا يعمل داخل تطبيق فيسبوك.<br>
@@ -544,16 +305,27 @@
     </div>
     <div class="warning-banner adblock" id="adblockWarning">
         <strong>⚠️ كاشف حظر الإعلانات</strong>
-        تم اكتشاف برنامج حظر إعلانات.<br>
-        قد يؤثر على تشغيل البث. يرجى تعطيله لهذه الصفحة.
+        تم اكتشاف برنامج حظر إعلانات. قد يؤثر على تشغيل البث. يرجى تعطيله لهذه الصفحة.
     </div>
     <div class="warning-banner network" id="networkWarning">
         <strong>⚠️ مشكلة في الشبكة</strong>
-        اتصال الإنترنت ضعيف أو محظور.<br>
-        جرب شبكة مختلفة أو تحقق من جدار الحماية.
+        اتصال الإنترنت ضعيف أو محظور. جرب شبكة مختلفة أو تحقق من جدار الحماية.
+    </div>
+    <div class="adhan-banner" id="adhanBanner">🕌 حان وقت الصلاة — <span id="adhanPrayerName"></span></div>
+    <div class="ios-install-banner" id="iosInstallBanner">
+        <button class="ios-dismiss-btn" id="iosDismissBtn">✕</button>
+        <strong>📲 أضف التطبيق إلى شاشتك الرئيسية</strong><br>
+        اضغط <strong>◻ مشاركة</strong> في الأسفل ← <strong>"إضافة إلى الشاشة الرئيسية"</strong>
+    </div>
+    <div class="resume-banner" id="resumeBanner">
+        <span>🎙 استمر في الاستماع من حيث توقفت؟</span>
+        <button class="resume-yes" id="resumeYes">نعم</button>
+        <button class="resume-no"  id="resumeNo">لا</button>
     </div>
 
+    <!-- ── MAIN CARD ── -->
     <div class="app-container" id="app">
+
         <div class="symbol-container" id="playButton">
             <div class="symbol">
                 <div class="circle circle-1"></div>
@@ -562,40 +334,46 @@
                 <div class="symbol-core">۞</div>
             </div>
         </div>
-        
+
         <h1 class="title">إذاعة القرآن الكريم</h1>
         <h2 class="subtitle">من القاهرة • بث مباشر</h2>
-        
+
+        <div class="date-row">
+            <span id="hijriDate">—</span>
+        </div>
+
         <div class="status idle" id="status">اضغط على الرمز ۞ لبدء الاستماع المباشر</div>
-        
+
         <div class="controls-container">
             <div class="control-btn" id="toggleBtn">▶</div>
         </div>
-        
+
         <div class="volume-container">
             <div class="volume-icon" id="volumeIcon">🔉</div>
             <input type="range" min="0" max="1" step="0.01" value="0.85" class="volume-slider" id="volumeSlider">
         </div>
-        
+
         <div class="action-buttons">
             <button class="action-btn" id="shareBtn">📤 مشاركة</button>
             <button class="action-btn" id="sleepTimerBtn">⏰ مؤقت</button>
             <button class="action-btn" id="installBtn" style="display:none;">📱 تثبيت</button>
-            <button class="action-btn" id="updateBtn" style="display:none;">🔄 إصدار جديد</button>
+            <button class="action-btn" id="updateBtn"  style="display:none;">🔄 إصدار جديد</button>
         </div>
-        
-        <div class="prayer-times" id="prayerTimes">
+
+        <div class="prayer-times">
             الصلاة القادمة: <span class="prayer-countdown" id="prayerCountdown">جارٍ التحميل...</span>
         </div>
-        
         <div class="instructions">
             "وَإِذَا قُرِئَ الْقُرْآنُ فَاسْتَمِعُوا لَهُ وَأَنْصِتُوا لَعَلَّكُمْ تُرْحَمُونَ"
-            <br><span style="font-size:0.9em; display:block; margin-top:8px;">سورة الأعراف، الآية ٢٠٤</span> <!-- ✅ VERSE CORRECTED -->
+            <br><span style="font-size:.9em;display:block;margin-top:8px;">سورة الأعراف، الآية ٢٠٤</span>
         </div>
-        
+
         <div class="footer">
             Holy Quran Radio • Cairo, Egypt
-            <div class="broadcast-status" id="broadcastStatus">بث: جاهز</div>
+            <div class="broadcast-row">
+                <div class="health-dot" id="healthDot"></div>
+                <div class="broadcast-status" id="broadcastStatus">بث: جاهز</div>
+            </div>
         </div>
 
         <div class="compat-info">
@@ -603,9 +381,8 @@
             ملاحظة: قد لا يعمل داخل تطبيقات مثل فيسبوك، إنستغرام، تويتر
         </div>
 
-        <!-- ✅ UTILITY BUTTONS ROW (No duplicate refresh) -->
         <div class="utility-buttons">
-            <button class="utility-btn" id="refreshBtn">⟳ تحديث</button>
+            <button class="utility-btn" id="refreshBtn">⟳ تحديث الصفحة</button>
         </div>
     </div>
 
@@ -613,398 +390,371 @@
     <div class="sleep-timer-modal" id="sleepTimerModal">
         <div class="sleep-timer-content">
             <h3>⏰ مؤقت النوم</h3>
+            <p>سيتوقف البث تلقائياً عند انتهاء المدة</p>
             <div class="sleep-timer-options">
-                <button class="sleep-timer-btn" data-minutes="15">١٥ دقيقة</button>
+                <button class="sleep-timer-btn" data-minutes="20">٢٠ دقيقة</button>
                 <button class="sleep-timer-btn" data-minutes="30">٣٠ دقيقة</button>
-                <button class="sleep-timer-btn" data-minutes="60">٦٠ دقيقة</button>
+                <button class="sleep-timer-btn" data-minutes="45">٤٥ دقيقة</button>
+                <button class="sleep-timer-btn" data-minutes="90">٩٠ دقيقة</button>
                 <button class="sleep-timer-btn close">إغلاق</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // 🔴 YOUR 3 CAIRO STREAM URLS (Preserved Exactly)
-        // ============================================
+        // ============================================================
+        // STREAM URLS
+        // ============================================================
         const CAIRO_STREAM_URLS = [
-            "https://stream.radiojar.com/8s5u5tpdtwzuv",   // Server 1 - Primary
-            "https://n03.radiojar.com/8s5u5tpdtwzuv",    // Server 2 - Backup
-            "http://n0e.radiojar.com/8s5u5tpdtwzuv"     // Server 3 - Backup
+            "https://stream.radiojar.com/8s5u5tpdtwzuv",   // Primary CDN
+            "https://n03.radiojar.com/8s5u5tpdtwzuv",      // Backup node 1
+            "https://n04.radiojar.com/8s5u5tpdtwzuv",      // Backup node 2
+            "https://n0e.radiojar.com/8s5u5tpdtwzuv"       // Backup node 3
         ];
 
-        // ============================================
-        // CONFIGURATION
-        // ============================================
-        const DEBUG = false;
+        // ============================================================
+        // CONFIG
+        // ============================================================
+        const DEBUG             = false;
         const STREAM_TIMEOUT_MS = 3000;
         const RECONNECT_LOOP_MS = 5000;
-        const DEFAULT_VOLUME = 0.85;
-        const APP_VERSION = '1.1.0';
+        const DEFAULT_VOLUME    = 0.85;
+        const APP_VERSION       = '2.0.0';
         const CLICK_DEBOUNCE_MS = 300;
-        const PRAYER_UPDATE_INTERVAL_MS = 1000;
+        const FADE_STEPS        = 20;
+        const FADE_INTERVAL_MS  = 100; // 20 × 100ms = 2s fade
 
-        // ============================================
+        // ============================================================
         // STATE
-        // ============================================
-        let audio = null;
-        let audioContext = null;
-        let isPlaying = false;
-        let currentServerIndex = 0;
-        let reconnectAttempts = 0;
-        let maxReconnectAttempts = 3;
-        let isSwitchingServer = false;
-        let lastErrorTime = 0;
-        let errorTimeout = null;
-        let stallTimeout = null;
-        let isInitializing = false;
-        let lastClickTime = 0;
-        let lastShareClickTime = 0;
-        let hasAttemptedPlay = false;
+        // ============================================================
+        let audio                   = null;
+        let audioContext            = null;
+        let isPlaying               = false;
+        let currentServerIndex      = 0;
+        let isSwitchingServer       = false;
+        let isDestroyingAudio       = false;
+        let lastErrorTime           = 0;
+        let stallTimeout            = null;
+        let errorTimeout            = null;
+        let isInitializing          = false;
+        let lastClickTime           = 0;
+        let lastShareClickTime      = 0;
+        let hasAttemptedPlay        = false;
         let userPausedIntentionally = false;
-        let reconnectLoopTimer = null;
-        let sleepTimerTimeout = null;
-        let sleepTimerInterval = null;
-        let currentSleepTimerMinutes = 0;
-        let isSleepTimerActive = false;
-        let deferredPrompt = null;
-        let isPWAInstalled = false;
-        let isOnline = navigator.onLine;
+        let reconnectLoopTimer      = null;
+        let sleepTimerTimeout       = null;
+        let sleepTimerInterval      = null;
+        let currentSleepTimerSec    = 0;
+        let isSleepTimerActive      = false;
+        let deferredPrompt          = null;
+        let isPWAInstalled          = false;
+        let isOnline                = navigator.onLine;
         let prayerCountdownInterval = null;
-        let nextPrayerTime = null;
-        let nextPrayerName = '';
-        let prayerTimings = null;
+        let nextPrayerTime          = null;
+        let nextPrayerName          = '';
+        let prayerTimings           = null;
+        let adhanShownFor           = '';
 
-        // ============================================
-        // DOM ELEMENTS
-        // ============================================
-        const app = document.getElementById('app');
-        const playButton = document.getElementById('playButton');
-        const toggleBtn = document.getElementById('toggleBtn');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const volumeIcon = document.getElementById('volumeIcon');
-        const statusEl = document.getElementById('status');
-        const broadcastStatus = document.getElementById('broadcastStatus');
-        const facebookWarning = document.getElementById('facebookWarning');
-        const adblockWarning = document.getElementById('adblockWarning');
-        const networkWarning = document.getElementById('networkWarning');
-        const shareBtn = document.getElementById('shareBtn');
-        const sleepTimerBtn = document.getElementById('sleepTimerBtn');
-        const installBtn = document.getElementById('installBtn');
-        const updateBtn = document.getElementById('updateBtn');
-        const prayerTimes = document.getElementById('prayerTimes');
-        const prayerCountdown = document.getElementById('prayerCountdown');
-        const sleepTimerModal = document.getElementById('sleepTimerModal');
-        const refreshBtn = document.getElementById('refreshBtn');
+        // ============================================================
+        // DOM
+        // ============================================================
+        const app                = document.getElementById('app');
+        const playButton         = document.getElementById('playButton');
+        const toggleBtn          = document.getElementById('toggleBtn');
+        const volumeSlider       = document.getElementById('volumeSlider');
+        const volumeIcon         = document.getElementById('volumeIcon');
+        const statusEl           = document.getElementById('status');
+        const broadcastStatus    = document.getElementById('broadcastStatus');
+        const healthDot          = document.getElementById('healthDot');
+        const facebookWarning    = document.getElementById('facebookWarning');
+        const adblockWarning     = document.getElementById('adblockWarning');
+        const networkWarning     = document.getElementById('networkWarning');
+        const adhanBanner        = document.getElementById('adhanBanner');
+        const adhanPrayerName    = document.getElementById('adhanPrayerName');
+        const shareBtn           = document.getElementById('shareBtn');
+        const sleepTimerBtn      = document.getElementById('sleepTimerBtn');
+        const installBtn         = document.getElementById('installBtn');
+        const prayerCountdown    = document.getElementById('prayerCountdown');
+        const sleepTimerModal    = document.getElementById('sleepTimerModal');
+        const refreshBtn         = document.getElementById('refreshBtn');
+        const hijriDateEl        = document.getElementById('hijriDate');
+        const iosInstallBanner   = document.getElementById('iosInstallBanner');
+        const iosDismissBtn      = document.getElementById('iosDismissBtn');
+        const resumeBanner       = document.getElementById('resumeBanner');
+        const resumeYes          = document.getElementById('resumeYes');
+        const resumeNo           = document.getElementById('resumeNo');
 
-        // ============================================
+        // ============================================================
         // BROWSER DETECTION
-        // ============================================
-        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        const isHTTPS = window.location.protocol === 'https:';
+        // ============================================================
+        const isIOS        = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const isFirefox    = navigator.userAgent.toLowerCase().includes('firefox');
+        const isStandalone = window.matchMedia('(display-mode:standalone)').matches || !!window.navigator.standalone;
 
-        // ============================================
-        // INITIALIZATION
-        // ============================================
+        // ============================================================
+        // INIT
+        // ============================================================
         document.addEventListener('DOMContentLoaded', () => {
-            // ✅ FIX #1: Load saved volume from localStorage
-            const savedVolume = loadSavedVolume();
-            volumeSlider.value = savedVolume;
-            updateVolumeIcon(savedVolume);
-            
+            const vol = loadSavedVolume();
+            volumeSlider.value = vol;
+            updateVolumeIcon(vol);
+
             detectEnvironment();
             checkAdblock();
             setupAudioContext();
             setupPreload();
             setupNetworkMonitoring();
             setupEventListeners();
+            setupMediaSession();
+            renderHijriDate();
+
             loadCairoPrayerTimes().then(() => {
                 updatePrayerCountdown();
                 startPrayerCountdownUpdates();
             });
-            
+
             if (isIOS) {
                 volumeSlider.disabled = true;
                 volumeIcon.textContent = '📱';
                 volumeSlider.style.opacity = '0.5';
+                if (!isStandalone && !loadFlag('iosDismissed')) {
+                    setTimeout(() => iosInstallBanner.classList.add('show'), 4000);
+                }
             }
-            
-            logDebug("App initialized v" + APP_VERSION);
+
+            if (loadFlag('wasPlaying')) {
+                setTimeout(() => resumeBanner.classList.add('show'), 700);
+            }
+
+            logDebug("App v" + APP_VERSION + " initialized");
             startReconnectLoop();
         });
 
-        // ============================================
-        // VOLUME PERSISTENCE (Fixed)
-        // ============================================
-        function loadSavedVolume() {
+        // ============================================================
+        // HIJRI DATE
+        // ============================================================
+        function renderHijriDate() {
             try {
-                const saved = localStorage.getItem('quranRadioVolume');
-                return saved ? parseFloat(saved) : DEFAULT_VOLUME;
-            } catch (e) {
-                logDebug("Could not load volume:", e);
-                return DEFAULT_VOLUME;
-            }
+                const now  = new Date();
+                const jd   = Math.floor(now.getTime() / 86400000) + 2440587;
+                let   l    = jd - 1948440 + 10632;
+                const n    = Math.floor((l - 1) / 10631);
+                l          = l - 10631 * n + 354;
+                const j    = (Math.floor((10985 - l) / 5316)) * (Math.floor((50 * l) / 17719))
+                           + (Math.floor(l / 5670))            * (Math.floor((43 * l) / 15238));
+                l          = l - (Math.floor((30 - j) / 15))   * (Math.floor((17719 * j) / 50))
+                           - (Math.floor(j / 16))              * (Math.floor((15238 * j) / 43)) + 29;
+                const hM   = Math.floor((24 * l) / 709);
+                const hD   = l - Math.floor((709 * hM) / 24);
+                const hY   = 30 * n + j - 30;
+                const mArr = ['محرم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الثانية',
+                              'رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+                hijriDateEl.textContent = `${hD} ${mArr[hM - 1]} ${hY} هـ`;
+            } catch(e) { hijriDateEl.textContent = ''; }
         }
 
-        function saveVolume(volume) {
-            try {
-                localStorage.setItem('quranRadioVolume', volume.toString());
-            } catch (e) {
-                logDebug("Could not save volume:", e);
-            }
-        }
-
-        function updateVolumeIcon(volume) {
-            if (isIOS) {
-                volumeIcon.textContent = '📱';
-                return;
-            }
-            
-            if (volume === 0) {
-                volumeIcon.textContent = '🔇';
-            } else if (volume < 0.5) {
-                volumeIcon.textContent = '🔈';
-            } else {
-                volumeIcon.textContent = '🔊';
-            }
-        }
-
-        // ============================================
-        // PRAYER COUNTDOWN SYSTEM
-        // ============================================
+        // ============================================================
+        // PRAYER SYSTEM
+        // ============================================================
         async function loadCairoPrayerTimes() {
             try {
-                const date = new Date();
-                const response = await fetch(
-                    `https://api.aladhan.com/v1/timingsByCity/${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}?city=Cairo&country=Egypt&method=5`
+                const d   = new Date();
+                const res = await fetch(
+                    `https://api.aladhan.com/v1/timingsByCity/${d.getDate()}-${d.getMonth()+1}-${d.getFullYear()}?city=Cairo&country=Egypt&method=5`
                 );
-                const data = await response.json();
-                
+                const data = await res.json();
                 if (data.code === 200) {
                     prayerTimings = data.data.timings;
-                    const nextPrayerInfo = getNextPrayer(prayerTimings);
-                    nextPrayerName = nextPrayerInfo.name;
-                    nextPrayerTime = nextPrayerInfo.time;
-                    logDebug(`Loaded prayer times for Cairo: ${nextPrayerName} at ${nextPrayerTime}`);
+                    const info    = getNextPrayer(prayerTimings);
+                    nextPrayerName = info.name;
+                    nextPrayerTime = info.time;
                 } else {
                     prayerCountdown.textContent = "غير متاح";
                 }
-            } catch (e) {
-                logDebug("Prayer times error:", e);
+            } catch(e) {
+                logDebug("Prayer API error:", e);
                 prayerCountdown.textContent = "غير متاح";
             }
         }
 
-        function getNextPrayer(timings) {
+        function getNextPrayer(t) {
             const now = new Date();
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            
-            const prayers = [
-                { name: 'الفجر', time: timings.Fajr },
-                { name: 'الظهر', time: timings.Dhuhr },
-                { name: 'العصر', time: timings.Asr },
-                { name: 'المغرب', time: timings.Maghrib },
-                { name: 'العشاء', time: timings.Isha }
+            const cur = now.getHours() * 60 + now.getMinutes();
+            const list= [
+                {name:'الفجر',  time:t.Fajr},
+                {name:'الظهر',  time:t.Dhuhr},
+                {name:'العصر',  time:t.Asr},
+                {name:'المغرب', time:t.Maghrib},
+                {name:'العشاء', time:t.Isha}
             ];
-            
-            for (const prayer of prayers) {
-                const [hours, minutes] = prayer.time.split(':').map(Number);
-                const prayerMinutes = hours * 60 + minutes;
-                if (prayerMinutes > currentMinutes) {
-                    return { name: prayer.name, time: prayer.time };
-                }
+            for (const p of list) {
+                const [h,m] = p.time.split(':').map(Number);
+                if (h * 60 + m > cur) return {name: p.name, time: p.time};
             }
-            
-            return { name: 'الفجر (غدًا)', time: timings.Fajr };
+            return {name:'الفجر (غدًا)', time: t.Fajr};
         }
 
         function updatePrayerCountdown() {
-            if (!nextPrayerTime || !prayerTimings) {
-                prayerCountdown.textContent = "جارٍ التحميل...";
-                return;
-            }
-            
-            const now = new Date();
-            const [hours, minutes] = nextPrayerTime.split(':').map(Number);
-            const prayerDate = new Date(now);
-            prayerDate.setHours(hours, minutes, 0, 0);
-            
-            if (prayerDate < now) {
-                prayerDate.setDate(prayerDate.getDate() + 1);
-            }
-            
-            const diff = prayerDate.getTime() - now.getTime();
-            
+            if (!nextPrayerTime || !prayerTimings) { prayerCountdown.textContent = "جارٍ التحميل..."; return; }
+            const now    = new Date();
+            const [h, m] = nextPrayerTime.split(':').map(Number);
+            const target = new Date(now);
+            target.setHours(h, m, 0, 0);
+            if (target < now) target.setDate(target.getDate() + 1);
+            const diff   = target - now;
             if (diff <= 0) {
-                loadCairoPrayerTimes().then(() => {
-                    updatePrayerCountdown();
-                });
+                if (nextPrayerName !== adhanShownFor && !nextPrayerName.includes('غدًا')) {
+                    adhanShownFor = nextPrayerName;
+                    triggerAdhan(nextPrayerName);
+                }
+                loadCairoPrayerTimes().then(() => { updatePrayerCountdown(); });
                 return;
             }
-            
-            const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
-            const minutesLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000));
-            const secondsLeft = Math.floor((diff % (1000)) / 1000);
-            
-            let timeText = '';
-            if (hoursLeft > 0) {
-                timeText = `${hoursLeft}:${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
-            } else if (minutesLeft > 0) {
-                timeText = `${minutesLeft}:${String(secondsLeft).padStart(2, '0')}`;
-            } else {
-                timeText = `${secondsLeft}`;
-            }
-            
-            prayerCountdown.innerHTML = `<strong>${nextPrayerName}</strong>: ${timeText}`;
+            const ts = Math.floor(diff / 1000);
+            const hl = Math.floor(ts / 3600);
+            const ml = Math.floor((ts % 3600) / 60);
+            const sl = ts % 60;
+            prayerCountdown.innerHTML = `<strong>${nextPrayerName}</strong>: ` + (
+                hl > 0 ? `${hl}:${pad(ml)}:${pad(sl)}` : ml > 0 ? `${ml}:${pad(sl)}` : `${sl}`
+            );
         }
 
         function startPrayerCountdownUpdates() {
             if (prayerCountdownInterval) clearInterval(prayerCountdownInterval);
-            prayerCountdownInterval = setInterval(updatePrayerCountdown, PRAYER_UPDATE_INTERVAL_MS);
+            prayerCountdownInterval = setInterval(() => { updatePrayerCountdown(); }, 1000);
         }
 
-        // ============================================
-        // NETWORK MONITORING (Fixed Auto-Reconnect)
-        // ============================================
+        function triggerAdhan(name) {
+            adhanPrayerName.textContent = name;
+            adhanBanner.classList.add('show');
+            setTimeout(() => adhanBanner.classList.remove('show'), 30000);
+        }
+
+        // ============================================================
+        // NETWORK MONITORING
+        // ============================================================
         function setupNetworkMonitoring() {
             window.addEventListener('offline', () => {
                 isOnline = false;
-                logDebug("Network offline");
-                if (isPlaying) {
-                    networkWarning.classList.add('show');
-                    updateStatus("انقطع اتصال الإنترنت", "error", 3000);
-                }
+                setDot('red');
+                if (isPlaying) { networkWarning.classList.add('show'); updateStatus("انقطع اتصال الإنترنت","error",3000); }
             });
-
             window.addEventListener('online', () => {
                 isOnline = true;
-                logDebug("Network online");
                 networkWarning.classList.remove('show');
-                
-                setTimeout(() => {
-                    if (navigator.onLine) {
-                        networkWarning.classList.remove('show');
-                    }
-                }, 5000);
-                
-                // ✅ FIX #2: Auto-reconnect when network returns (only if user had attempted play)
+                if (!prayerTimings) loadCairoPrayerTimes().then(() => { updatePrayerCountdown(); startPrayerCountdownUpdates(); });
                 if (!isPlaying && hasAttemptedPlay && !userPausedIntentionally && !isSleepTimerActive) {
-                    logDebug("Auto-reconnecting after network restore");
                     updateStatus("تم استعادة الاتصال - جارٍ التشغيل...", "reconnecting", 2000);
-                    setTimeout(() => {
-                        if (navigator.onLine) {
-                            startAudio();
-                        }
-                    }, 1000);
+                    setTimeout(() => { if (navigator.onLine) startAudio(); }, 1000);
                 }
             });
         }
 
-        // ============================================
-        // STATUS MANAGEMENT (Auto-clearing)
-        // ============================================
-        function updateStatus(text, className, duration = 3000) {
-            if (window.statusClearTimeout) clearTimeout(window.statusClearTimeout);
-            
+        // ============================================================
+        // STATUS
+        // ============================================================
+        function updateStatus(text, cls, duration = 3000) {
+            if (window._sClear) clearTimeout(window._sClear);
             statusEl.classList.add('fade-out');
             setTimeout(() => {
                 statusEl.textContent = text;
-                statusEl.className = `status ${className}`;
+                statusEl.className   = `status ${cls}`;
                 statusEl.classList.remove('fade-out');
-                
-                if (className !== 'playing' && className !== 'sleep-timer') {
-                    window.statusClearTimeout = setTimeout(() => {
-                        if (isPlaying) {
-                            statusEl.textContent = "الاستماع جارٍ الآن";
-                            statusEl.className = "status playing";
-                        } else {
-                            statusEl.textContent = "اضغط على الرمز ۞ لبدء الاستماع المباشر";
-                            statusEl.className = "status idle";
-                        }
+                if (cls !== 'playing' && cls !== 'sleep-timer') {
+                    window._sClear = setTimeout(() => {
+                        statusEl.textContent = isPlaying ? "الاستماع جارٍ الآن" : "اضغط على الرمز ۞ لبدء الاستماع المباشر";
+                        statusEl.className   = `status ${isPlaying ? 'playing' : 'idle'}`;
                     }, duration);
                 }
             }, 400);
         }
 
-        // ============================================
+        // ============================================================
+        // STREAM HEALTH DOT
+        // ============================================================
+        function setDot(state) {
+            healthDot.className = 'health-dot';
+            if (state) healthDot.classList.add(state);
+        }
+
+        // ============================================================
+        // MEDIA SESSION API
+        // ============================================================
+        function setupMediaSession() {
+            if (!('mediaSession' in navigator)) return;
+            const art = "data:image/svg+xml," + encodeURIComponent(
+                "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>" +
+                "<rect width='512' height='512' fill='%230f172a'/>" +
+                "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='300' fill='%23D4AF37'>۞</text>" +
+                "</svg>"
+            );
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title:   'إذاعة القرآن الكريم',
+                artist:  'القاهرة • بث مباشر',
+                album:   'Holy Quran Radio',
+                artwork: [{ src: art, sizes: '512x512', type: 'image/svg+xml' }]
+            });
+            navigator.mediaSession.setActionHandler('play',  () => { if (!isPlaying) startAudio(); });
+            navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying)  stopAudio();  });
+            navigator.mediaSession.setActionHandler('stop',  () => { if (isPlaying)  stopAudio();  });
+        }
+
+        function syncMediaSession(playing) {
+            if (!('mediaSession' in navigator)) return;
+            navigator.mediaSession.playbackState = playing ? 'playing' : 'paused';
+        }
+
+        // ============================================================
         // AUDIO MANAGEMENT
-        // ============================================
+        // ============================================================
         function destroyAudio() {
             if (audio) {
-                const events = ['playing', 'pause', 'ended', 'error', 'stalled', 'waiting', 'abort', 'suspend', 'timeupdate', 'seeking'];
-                events.forEach(event => {
-                    audio.removeEventListener(event, eventHandlers[event]);
-                });
-
-                try {
-                    audio.pause();
-                    audio.src = '';
-                    audio.load();
-                } catch (e) {
-                    logDebug("Error during audio destroy:", e);
-                }
+                isDestroyingAudio = true;
+                ['playing','pause','ended','error','stalled','waiting','abort']
+                    .forEach(ev => audio.removeEventListener(ev, eventHandlers[ev]));
+                try { audio.pause(); audio.src = ''; audio.load(); } catch(e) {}
                 audio = null;
+                isDestroyingAudio = false;
             }
-
             if (stallTimeout) { clearTimeout(stallTimeout); stallTimeout = null; }
         }
 
         function initAudio() {
             if (isInitializing) return;
             isInitializing = true;
-            
             destroyAudio();
-            
             audio = new Audio();
-            audio.crossOrigin = "anonymous";
-            audio.volume = 0.9; // 90% default volume
-            
-            if (isIOS) {
-                audio.setAttribute('playsinline', '');
-                audio.setAttribute('webkit-playsinline', '');
-            }
-            
-            audio.setAttribute('controlsList', 'nodownload nofullscreen noremoteplayback');
-            audio.setAttribute('disableRemotePlayback', '');
-            audio.preload = "metadata";
-            
-            Object.entries(eventHandlers).forEach(([event, handler]) => {
-                audio.addEventListener(event, handler);
-            });
-            
+            if (!isFirefox) audio.crossOrigin = "anonymous";
+            audio.volume  = isIOS ? 1.0 : loadSavedVolume();
+            audio.preload = "none";
+            if (isIOS) { audio.setAttribute('playsinline',''); audio.setAttribute('webkit-playsinline',''); }
+            audio.setAttribute('controlsList','nodownload nofullscreen noremoteplayback');
+            audio.setAttribute('disableRemotePlayback','');
+            Object.entries(eventHandlers).forEach(([ev, fn]) => audio.addEventListener(ev, fn));
             isInitializing = false;
-            logDebug("Audio initialized");
         }
 
         const eventHandlers = {
-            playing: onPlaying,
-            pause: onPause,
-            ended: onEnded,
-            error: onError,
-            stalled: onStalled,
-            waiting: onWaiting,
-            abort: onAbort,
-            suspend: onSuspend
+            playing: onPlaying, pause: onPause, ended: onEnded,
+            error: onError, stalled: onStalled, waiting: onWaiting, abort: onAbort
         };
 
-        // ============================================
-        // EVENT HANDLERS
-        // ============================================
+        // ============================================================
+        // PLAYBACK EVENT HANDLERS
+        // ============================================================
         function onPlaying() {
-            isPlaying = true;
-            reconnectAttempts = 0;
+            isPlaying         = true;
             isSwitchingServer = false;
             app.classList.add('playing');
             toggleBtn.innerHTML = '■';
             toggleBtn.classList.add('stop');
             updateStatus("الاستماع جارٍ الآن", "playing");
             updateBroadcastStatus();
+            setDot('green');
             networkWarning.classList.remove('show');
-
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume().catch(e => logDebug("AudioContext resume:", e));
-            }
-
-            logDebug(`Playing from Cairo server ${currentServerIndex + 1}`);
+            syncMediaSession(true);
+            saveFlag('wasPlaying', true);
+            if (audioContext && audioContext.state === 'suspended') audioContext.resume().catch(() => {});
         }
 
         function onPause() {
@@ -1013,222 +763,219 @@
             app.classList.remove('playing');
             toggleBtn.innerHTML = '▶';
             toggleBtn.classList.remove('stop');
+            setDot('');
+            syncMediaSession(false);
             updateStatus("مُوقَف مؤقتًا", "idle");
-            logDebug("Audio paused");
         }
 
-        function onEnded() {
-            if (!isPlaying || isSwitchingServer) return;
-            logDebug("Stream ended - trying next");
-            tryNextStream();
-        }
+        function onEnded()   { if (!isPlaying || isSwitchingServer) return; tryNextStream(); }
 
-        function onError(e) {
+        function onError()   {
             const now = Date.now();
             if (now - lastErrorTime < 2000) return;
             lastErrorTime = now;
-            
-            if (e.name !== 'AbortError') {
-                logDebug("Stream error:", e);
-            }
-            if (!isSwitchingServer) {
-                tryNextStream();
-            }
+            setDot('red');
+            if (!isSwitchingServer) tryNextStream();
         }
 
         function onStalled() {
             if (!isPlaying || isSwitchingServer) return;
+            setDot('yellow');
             if (stallTimeout) clearTimeout(stallTimeout);
-            stallTimeout = setTimeout(() => {
-                logDebug("Stream stalled - trying next");
-                tryNextStream();
-            }, 3000);
+            stallTimeout = setTimeout(() => tryNextStream(), 3000);
         }
 
         function onWaiting() {
             if (!isPlaying || isSwitchingServer) return;
+            setDot('yellow');
             updateStatus("جارٍ التحميل...", "info", 1500);
         }
 
         function onAbort() {
-            if (isSwitchingServer) return;
-            logDebug("Stream aborted");
+            if (isSwitchingServer || isDestroyingAudio) return;
             tryNextStream();
         }
 
-        function onSuspend() {
-            if (isSwitchingServer) return;
-            logDebug("Stream suspended");
-            tryNextStream();
-        }
-
-        // ============================================
-        // SMART STREAM CYCLING
-        // ============================================
+        // ============================================================
+        // STREAM CYCLING
+        // ============================================================
         function tryNextStream() {
             if (!isPlaying || isSwitchingServer) return;
-
             stopReconnectLoop();
             isSwitchingServer = true;
+            setDot('yellow');
+            const guard = setTimeout(() => { if (isSwitchingServer) { isSwitchingServer = false; logDebug("Guard: reset isSwitchingServer"); } }, 10000);
             updateStatus("جارٍ الاتصال بالبث الاحتياطي...", "reconnecting", 2000);
-
             destroyAudio();
             initAudio();
-
             currentServerIndex = (currentServerIndex + 1) % CAIRO_STREAM_URLS.length;
-
-            if (currentServerIndex === 0 && currentServerIndex > 0) {
-                stopAudio();
-                updateStatus(navigator.onLine ? 
-                    "حدث خطأ فني. يرجى المحاولة لاحقًا." : 
-                    "لا يوجد اتصال بالإنترنت", "error", 4000);
-                broadcastStatus.textContent = "بث: غير متصل";
-                broadcastStatus.className = "broadcast-status";
-                
-                if (!navigator.onLine) {
-                    networkWarning.classList.add('show');
-                }
-
-                logDebug("All servers failed during playback");
+            if (currentServerIndex === 0) {
+                clearTimeout(guard);
+                stopAudioInternal();
+                updateStatus(navigator.onLine ? "حدث خطأ فني. يرجى المحاولة لاحقًا." : "لا يوجد اتصال بالإنترنت", "error", 4000);
+                setDot('red');
                 return;
             }
-
             audio.src = `${CAIRO_STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
             broadcastStatus.textContent = "بث: جارٍ الاتصال...";
-
-            const playPromise = audio.play();
-
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    isSwitchingServer = false;
-                    if (error.name !== 'AbortError') {
-                        logDebug(`Backup server ${currentServerIndex + 1} failed`);
-                        setTimeout(() => tryNextStream(), STREAM_TIMEOUT_MS);
-                    }
-                });
-            }
+            const p = audio.play();
+            if (p) p.catch(e => { isSwitchingServer = false; if (e.name !== 'AbortError') setTimeout(() => tryNextStream(), STREAM_TIMEOUT_MS); });
         }
 
         function startReconnectLoop() {
             if (reconnectLoopTimer) return;
-            
             reconnectLoopTimer = setInterval(() => {
-                if (hasAttemptedPlay && !isPlaying && !userPausedIntentionally && !isSleepTimerActive && navigator.onLine) {
-                    logDebug("Reconnect loop: Attempting to connect...");
-                    attemptConnect();
-                }
+                if (hasAttemptedPlay && !isPlaying && !userPausedIntentionally && !isSleepTimerActive && navigator.onLine) attemptConnect();
             }, RECONNECT_LOOP_MS);
         }
 
         function stopReconnectLoop() {
-            if (reconnectLoopTimer) {
-                clearInterval(reconnectLoopTimer);
-                reconnectLoopTimer = null;
-            }
+            if (reconnectLoopTimer) { clearInterval(reconnectLoopTimer); reconnectLoopTimer = null; }
         }
 
         function attemptConnect() {
             if (isPlaying || isSwitchingServer || isInitializing) return;
-
             isSwitchingServer = true;
+            setDot('yellow');
             updateStatus("جارٍ الاتصال...", "reconnecting", 2000);
             broadcastStatus.textContent = "بث: جارٍ الاتصال...";
-
             initAudio();
             audio.src = `${CAIRO_STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
-
-            const playPromise = audio.play();
-
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    isSwitchingServer = false;
-                    if (error.name !== 'AbortError') {
-                        logDebug("Connect failed, will retry...");
-                    }
-                });
-            }
+            const p = audio.play();
+            if (p) p.catch(() => { isSwitchingServer = false; });
         }
 
         function updateBroadcastStatus() {
-            broadcastStatus.textContent = `بث: ${currentServerIndex + 1} نشط`;
-            broadcastStatus.className = "broadcast-status active";
+            broadcastStatus.textContent = `بث: خادم ${currentServerIndex + 1} نشط`;
+            broadcastStatus.className   = "broadcast-status active";
         }
 
-        // ============================================
-        // SLEEP TIMER (Simplified Toggle Button)
-        // ============================================
+        // ============================================================
+        // 2-SECOND AUDIO FADE OUT
+        // ============================================================
+        function fadeOutAndStop(cb) {
+            if (!audio || isIOS) { cb(); return; }
+            const start = audio.volume;
+            const step  = start / FADE_STEPS;
+            let   count = 0;
+            const t = setInterval(() => {
+                count++;
+                if (audio && count < FADE_STEPS) {
+                    audio.volume = Math.max(0, start - step * count);
+                } else {
+                    clearInterval(t);
+                    cb();
+                }
+            }, FADE_INTERVAL_MS);
+        }
+
+        // ============================================================
+        // CONTROLS
+        // ============================================================
+        function startAudio() {
+            const now = Date.now();
+            if (now - lastClickTime < CLICK_DEBOUNCE_MS) return;
+            lastClickTime = now;
+            hasAttemptedPlay        = true;
+            userPausedIntentionally = false;
+            stopReconnectLoop();
+            if (audioContext && audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+            updateStatus("جارٍ الاتصال...", "idle", 2000);
+            setDot('yellow');
+            initAudio();
+            audio.src = `${CAIRO_STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
+            const p = audio.play();
+            if (p) p.catch(e => { if (e.name !== 'AbortError') setTimeout(() => tryNextStream(), STREAM_TIMEOUT_MS); });
+        }
+
+        // Full stop with fade, called by user button
+        function stopAudio() {
+            const now = Date.now();
+            if (now - lastClickTime < CLICK_DEBOUNCE_MS) return;
+            lastClickTime = now;
+            _doStop();
+        }
+
+        // Internal stop: no debounce (used by sleep timer / failsafe)
+        function stopAudioInternal() { _doStop(); }
+
+        function _doStop() {
+            hasAttemptedPlay        = false;
+            userPausedIntentionally = true;
+            stopReconnectLoop();
+            if (sleepTimerTimeout)  { clearTimeout(sleepTimerTimeout);   sleepTimerTimeout  = null; }
+            if (sleepTimerInterval) { clearInterval(sleepTimerInterval);  sleepTimerInterval = null; }
+            if (errorTimeout)       { clearTimeout(errorTimeout);         errorTimeout       = null; }
+            if (stallTimeout)       { clearTimeout(stallTimeout);         stallTimeout       = null; }
+            fadeOutAndStop(() => {
+                destroyAudio();
+                isPlaying          = false;
+                isSwitchingServer  = false;
+                isInitializing     = false;
+                lastErrorTime      = 0;
+                isSleepTimerActive = false;
+                updateSleepTimerButton();
+                app.classList.remove('playing');
+                toggleBtn.innerHTML = '▶';
+                toggleBtn.classList.remove('stop');
+                setDot('');
+                syncMediaSession(false);
+                updateStatus("تم إيقاف البث", "idle", 2000);
+                broadcastStatus.textContent = "بث: جاهز";
+                broadcastStatus.className   = "broadcast-status";
+                networkWarning.classList.remove('show');
+                saveFlag('wasPlaying', false);
+            });
+        }
+
+        function disableControls() {
+            toggleBtn.disabled = true;
+            toggleBtn.style.cssText = "opacity:.5;cursor:not-allowed;pointer-events:none";
+            playButton.style.pointerEvents = "none";
+            volumeSlider.disabled = true;
+        }
+
+        // ============================================================
+        // SLEEP TIMER
+        // ============================================================
         function setSleepTimer(minutes) {
-            // Clear existing timer
-            if (sleepTimerTimeout) {
-                clearTimeout(sleepTimerTimeout);
-                sleepTimerTimeout = null;
-            }
-            if (sleepTimerInterval) {
-                clearInterval(sleepTimerInterval);
-                sleepTimerInterval = null;
-            }
-
-            currentSleepTimerMinutes = minutes;
-            isSleepTimerActive = true;
+            if (sleepTimerTimeout)  { clearTimeout(sleepTimerTimeout);  sleepTimerTimeout  = null; }
+            if (sleepTimerInterval) { clearInterval(sleepTimerInterval); sleepTimerInterval = null; }
+            currentSleepTimerSec = minutes * 60;
+            isSleepTimerActive   = true;
+            updateStatus("⏰ مؤقت النوم نشط", "info");
             updateSleepTimerButton();
-
-            updateStatus(`⏰ مؤقت النوم: ${minutes} دقيقة`, "sleep-timer");
-
             sleepTimerInterval = setInterval(() => {
-                if (currentSleepTimerMinutes > 0) {
-                    currentSleepTimerMinutes--;
-                    const remainingMinutes = Math.floor(currentSleepTimerMinutes % 60);
-                    const remainingHours = Math.floor(currentSleepTimerMinutes / 60);
-                    
-                    if (remainingHours > 0) {
-                        updateStatus(`⏰ مؤقت النوم: ${remainingHours}:${String(remainingMinutes).padStart(2, '0')} دقيقة`, "sleep-timer");
-                    } else {
-                        updateStatus(`⏰ مؤقت النوم: ${remainingMinutes} دقيقة`, "sleep-timer");
-                    }
+                if (currentSleepTimerSec > 0) {
+                    currentSleepTimerSec--;
+                    updateSleepTimerButton();
                 } else {
                     clearInterval(sleepTimerInterval);
-                    if (isPlaying) {
-                        stopAudio();
-                        updateStatus("انتهى مؤقت النوم", "idle", 2000);
-                    }
+                    if (isPlaying) { stopAudioInternal(); updateStatus("انتهى مؤقت النوم", "idle", 2000); }
                     clearSleepTimer();
                 }
-            }, 60000);
-
+            }, 1000);
             sleepTimerTimeout = setTimeout(() => {
-                if (isPlaying) {
-                    stopAudio();
-                    updateStatus("انتهى مؤقت النوم", "idle", 2000);
-                }
+                if (isPlaying) { stopAudioInternal(); updateStatus("انتهى مؤقت النوم", "idle", 2000); }
                 clearInterval(sleepTimerInterval);
                 clearSleepTimer();
             }, minutes * 60 * 1000);
         }
 
         function clearSleepTimer() {
-            if (sleepTimerTimeout) {
-                clearTimeout(sleepTimerTimeout);
-                sleepTimerTimeout = null;
-            }
-            if (sleepTimerInterval) {
-                clearInterval(sleepTimerInterval);
-                sleepTimerInterval = null;
-            }
-
-            currentSleepTimerMinutes = 0;
-            isSleepTimerActive = false;
+            if (sleepTimerTimeout)  { clearTimeout(sleepTimerTimeout);  sleepTimerTimeout  = null; }
+            if (sleepTimerInterval) { clearInterval(sleepTimerInterval); sleepTimerInterval = null; }
+            currentSleepTimerSec = 0;
+            isSleepTimerActive   = false;
             updateSleepTimerButton();
-
-            if (!isPlaying) {
-                updateStatus("اضغط على الرمز ۞ لبدء الاستماع المباشر", "idle");
-            } else {
-                updateStatus("الاستماع جارٍ الآن", "playing");
-            }
+            updateStatus(isPlaying ? "الاستماع جارٍ الآن" : "اضغط على الرمز ۞ لبدء الاستماع المباشر", isPlaying ? "playing" : "idle");
         }
 
         function updateSleepTimerButton() {
             if (isSleepTimerActive) {
-                sleepTimerBtn.innerHTML = '⏰ إزالة المؤقت'; // ✅ SIMPLIFIED: Single toggle button
+                const m = Math.floor(currentSleepTimerSec / 60);
+                const s = currentSleepTimerSec % 60;
+                sleepTimerBtn.innerHTML = m > 0 ? `⏰ ${m}:${pad(s)}` : `⏰ ${s}ث`;
                 sleepTimerBtn.classList.add('sleep-active');
             } else {
                 sleepTimerBtn.innerHTML = '⏰ مؤقت';
@@ -1236,216 +983,182 @@
             }
         }
 
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-        function setupEventListeners() {
-            toggleBtn.addEventListener('click', handleToggleClick);
-            playButton.addEventListener('click', handleToggleClick);
+        // ============================================================
+        // SHARE — Native share sheet, clipboard fallback, prompt last resort
+        // ============================================================
+        async function handleShare() {
+            if (!canAct(lastShareClickTime, 2000)) return;
+            lastShareClickTime = Date.now();
+            const data = {
+                title: 'إذاعة القرآن الكريم',
+                text:  'استمع إلى القرآن الكريم من القاهرة — بث مباشر مجاني',
+                url:   window.location.href
+            };
+            if (navigator.share) {
+                try { await navigator.share(data); return; }
+                catch(e) { if (e.name === 'AbortError') return; }
+            }
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                updateStatus("تم نسخ الرابط للحافظة", "info", 2000);
+            } catch(e) {
+                window.prompt("انسخ الرابط:", window.location.href);
+            }
+        }
 
-            // ✅ SLEEP TIMER: Toggle functionality
-            sleepTimerBtn.addEventListener('click', () => {
-                if (!canPerformAction(lastClickTime)) return;
-                lastClickTime = Date.now();
-                
-                if (isSleepTimerActive) {
-                    clearSleepTimer();
-                    updateStatus("تم إزالة مؤقت النوم", "info", 1500);
-                } else {
-                    sleepTimerModal.classList.add('show');
+        // ============================================================
+        // EVENT LISTENERS
+        // ============================================================
+        function setupEventListeners() {
+            // Play / Stop buttons
+            toggleBtn.addEventListener('click', handleToggle);
+            playButton.addEventListener('click', handleToggle);
+
+            // Keyboard spacebar (desktop)
+            document.addEventListener('keydown', e => {
+                if (e.code === 'Space' && e.target === document.body) {
+                    e.preventDefault();
+                    handleToggle();
                 }
             });
 
+            // PWA Install
+            window.addEventListener('beforeinstallprompt', e => {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (!isPWAInstalled) installBtn.style.display = 'flex';
+            });
+            window.addEventListener('appinstalled', () => {
+                isPWAInstalled = true;
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            });
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            });
+
+            // Sleep timer
+            sleepTimerBtn.addEventListener('click', () => {
+                if (!canAct(lastClickTime)) return;
+                lastClickTime = Date.now();
+                if (isSleepTimerActive) { clearSleepTimer(); updateStatus("تم إزالة مؤقت النوم","info",1500); }
+                else sleepTimerModal.classList.add('show');
+            });
             document.querySelectorAll('.sleep-timer-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    if (!canPerformAction(lastClickTime)) return;
+                    if (!canAct(lastClickTime)) return;
                     lastClickTime = Date.now();
-                    
-                    if (btn.classList.contains('close')) {
-                        sleepTimerModal.classList.remove('show');
-                        return;
-                    }
-
-                    const minutes = parseInt(btn.dataset.minutes);
-                    setSleepTimer(minutes);
+                    if (btn.classList.contains('close')) { sleepTimerModal.classList.remove('show'); return; }
+                    setSleepTimer(parseInt(btn.dataset.minutes));
                     sleepTimerModal.classList.remove('show');
                 });
             });
+            sleepTimerModal.addEventListener('click', e => { if (e.target === sleepTimerModal) sleepTimerModal.classList.remove('show'); });
 
-            sleepTimerModal.addEventListener('click', (e) => {
-                if (e.target === sleepTimerModal) {
-                    sleepTimerModal.classList.remove('show');
-                }
-            });
-
-            // ✅ SHARE: Universal sharing (FIXED)
+            // Share
             shareBtn.addEventListener('click', handleShare);
 
-            // Volume control
-            volumeSlider.addEventListener('input', handleVolumeChange);
+            // Volume
+            volumeSlider.addEventListener('input', () => {
+                const v = parseFloat(volumeSlider.value);
+                saveVolume(v);
+                if (audio && !isIOS) audio.volume = v;
+                updateVolumeIcon(v);
+            });
 
-            // ✅ REFRESH: Single button in utility row
+            // Refresh
             refreshBtn.addEventListener('click', () => location.reload());
+
+            // iOS install banner dismiss
+            iosDismissBtn.addEventListener('click', () => {
+                iosInstallBanner.classList.remove('show');
+                saveFlag('iosDismissed', true);
+            });
+
+            // Resume prompt
+            resumeYes.addEventListener('click', () => { resumeBanner.classList.remove('show'); startAudio(); });
+            resumeNo.addEventListener('click',  () => { resumeBanner.classList.remove('show'); saveFlag('wasPlaying', false); });
+
+            // Adhan banner — tap to dismiss
+            adhanBanner.addEventListener('click', () => adhanBanner.classList.remove('show'));
         }
 
-        function handleToggleClick(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (toggleBtn.disabled || !canPerformAction(lastClickTime)) return;
-
-            if (isPlaying) {
-                stopAudio();
-            } else {
-                startAudio();
-            }
+        function handleToggle(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            if (e && e.stopPropagation) e.stopPropagation();
+            if (toggleBtn.disabled || !canAct(lastClickTime)) return;
+            if (isPlaying) stopAudio(); else startAudio();
         }
 
-        function handleShare() {
-            if (!canPerformAction(lastShareClickTime, 2000)) return;
-            lastShareClickTime = Date.now();
-            
-            if (navigator.share && isHTTPS) {
-                navigator.share({
-                    title: 'إذاعة القرآن الكريم',
-                    text: 'استمع إلى القرآن الكريم من القاهرة مباشرة',
-                    url: window.location.href
-                }).catch(() => {
-                    // Fallback: Copy to clipboard
-                    navigator.clipboard.writeText(window.location.href);
-                    updateStatus("تم نسخ الرابط للحافظة", "info", 2000);
-                });
-            } else {
-                // Universal fallback for all browsers
-                navigator.clipboard.writeText(window.location.href);
-                updateStatus("تم نسخ الرابط للحافظة", "info", 2000);
-            }
+        // ============================================================
+        // AUDIO CONTEXT + iOS KEEP-ALIVE
+        // ============================================================
+        function setupAudioContext() {
+            try {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!window.AudioContext) return;
+                audioContext = new AudioContext();
+                if (audioContext.state === 'suspended') {
+                    const unlock = () => audioContext.resume().then(() => {
+                        document.removeEventListener('touchstart', unlock);
+                        document.removeEventListener('touchend',   unlock);
+                        document.removeEventListener('click',      unlock);
+                    });
+                    document.addEventListener('touchstart', unlock, { once:true, passive:true });
+                    document.addEventListener('touchend',   unlock, { once:true, passive:true });
+                    document.addEventListener('click',      unlock, { once:true });
+                }
+                // iOS silent oscillator: keeps AudioContext alive when screen locks
+                if (isIOS) {
+                    const osc  = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    gain.gain.value = 0;
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.start();
+                }
+            } catch(e) { logDebug("AudioContext unavailable"); }
         }
 
-        function handleVolumeChange() {
-            const volume = parseFloat(volumeSlider.value);
-            saveVolume(volume); // ✅ FIXED: Save volume to localStorage
-            
-            if (audio && !isIOS) {
-                audio.volume = volume;
-            }
-            
-            updateVolumeIcon(volume);
+        function setupPreload() {
+            CAIRO_STREAM_URLS.forEach(url => {
+                try {
+                    const l = document.createElement('link');
+                    l.rel  = 'preconnect';
+                    l.href = new URL(url).origin;
+                    document.head.appendChild(l);
+                } catch(e) {}
+            });
         }
 
-        // ============================================
-        // CONTROLS
-        // ============================================
-        function startAudio() {
-            const now = Date.now();
-            if (now - lastClickTime < CLICK_DEBOUNCE_MS) return;
-            lastClickTime = now;
-
-            if (!navigator.onLine) {
-                updateStatus("لا يوجد اتصال بالإنترنت", "error", 3000);
-                networkWarning.classList.add('show');
-                return;
-            }
-
-            // Verify stream URLs are configured
-            if (!CAIRO_STREAM_URLS[0] || CAIRO_STREAM_URLS[0].includes('YOUR_')) {
-                updateStatus("خطأ في التكوين: لم يتم إضافة روابط البث", "error", 4000);
-                return;
-            }
-
-            hasAttemptedPlay = true;
-            userPausedIntentionally = false;
-            stopReconnectLoop();
-
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume().catch(e => logDebug("AudioContext resume failed:", e));
-            }
-
-            updateStatus("جارٍ الاتصال...", "idle", 2000);
-
-            initAudio();
-            audio.src = `${CAIRO_STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
-
-            const playPromise = audio.play();
-
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    if (error.name !== 'AbortError') {
-                        logDebug("Initial connect failed, cycling streams...");
-                        setTimeout(() => tryNextStream(), STREAM_TIMEOUT_MS);
-                    }
-                });
-            }
-        }
-
-        function stopAudio() {
-            const now = Date.now();
-            if (now - lastClickTime < CLICK_DEBOUNCE_MS) return;
-            lastClickTime = now;
-
-            hasAttemptedPlay = false;
-            userPausedIntentionally = true;
-            stopReconnectLoop();
-
-            if (sleepTimerTimeout) {
-                clearTimeout(sleepTimerTimeout);
-                sleepTimerTimeout = null;
-            }
-            if (sleepTimerInterval) {
-                clearInterval(sleepTimerInterval);
-                sleepTimerInterval = null;
-            }
-
-            if (errorTimeout) { clearTimeout(errorTimeout); errorTimeout = null; }
-            if (stallTimeout) { clearTimeout(stallTimeout); stallTimeout = null; }
-
-            destroyAudio();
-
-            isPlaying = false;
-            isSwitchingServer = false;
-            isInitializing = false;
-            lastErrorTime = 0;
-            isSleepTimerActive = false;
-            updateSleepTimerButton();
-
-            app.classList.remove('playing');
-            toggleBtn.innerHTML = '▶';
-            toggleBtn.classList.remove('stop');
-            updateStatus("تم إيقاف البث", "idle", 2000);
-            broadcastStatus.textContent = "بث: جاهز";
-            broadcastStatus.className = "broadcast-status";
-            networkWarning.classList.remove('show');
-
-            logDebug("Audio stopped");
-        }
-
-        function disableControls() {
-            toggleBtn.disabled = true;
-            toggleBtn.style.opacity = "0.5";
-            toggleBtn.style.cursor = "not-allowed";
-            toggleBtn.style.pointerEvents = "none";
-            playButton.style.pointerEvents = "none";
-            volumeSlider.disabled = true;
-        }
-
-        // ============================================
+        // ============================================================
         // UTILITIES
-        // ============================================
-        function canPerformAction(lastTime, debounceMs = CLICK_DEBOUNCE_MS) {
-            return Date.now() - lastTime >= debounceMs;
+        // ============================================================
+        const pad = n => String(n).padStart(2,'0');
+
+        function canAct(t, ms = CLICK_DEBOUNCE_MS) { return Date.now() - t >= ms; }
+
+        function loadSavedVolume() {
+            try { return parseFloat(localStorage.getItem('quranVolume') || DEFAULT_VOLUME); }
+            catch(e) { return DEFAULT_VOLUME; }
+        }
+        function saveVolume(v) { try { localStorage.setItem('quranVolume', v); } catch(e) {} }
+
+        function saveFlag(k, v) { try { localStorage.setItem(k, v ? '1' : '0'); } catch(e) {} }
+        function loadFlag(k)    { try { return localStorage.getItem(k) === '1'; } catch(e) { return false; } }
+
+        function updateVolumeIcon(v) {
+            if (isIOS) { volumeIcon.textContent = '📱'; return; }
+            volumeIcon.textContent = v === 0 ? '🔇' : v < 0.5 ? '🔈' : '🔊';
         }
 
         function detectEnvironment() {
-            const ua = navigator.userAgent || navigator.vendor || window.opera;
-            const isInAppBrowser = (
-                ua.includes('FBAN') || ua.includes('FBAV') ||
-                ua.includes('FB_IAB') || ua.includes('FB4A') ||
-                ua.includes('Instagram') || ua.includes('Twitter') ||
-                ua.includes('LinkedIn') || ua.includes('Snapchat') ||
-                ua.includes('TikTok') || /FBAV/.test(ua)
-            );
-
-            if (isInAppBrowser) {
+            const ua = navigator.userAgent || navigator.vendor || '';
+            if (['FBAN','FBAV','FB_IAB','Instagram','Twitter','LinkedIn','Snapchat','TikTok'].some(s => ua.includes(s))) {
                 facebookWarning.classList.add('show');
                 disableControls();
                 updateStatus("افتح في متصفح منفصل", "error", 4000);
@@ -1453,58 +1166,22 @@
         }
 
         function checkAdblock() {
-            const test = document.createElement('div');
-            test.innerHTML = '&nbsp;';
-            test.className = 'adsbox';
-            test.style.position = 'absolute';
-            test.style.left = '-9999px';
-            document.body.appendChild(test);
-
+            const t = Object.assign(document.createElement('div'), { innerHTML:'&nbsp;', className:'adsbox' });
+            t.style.cssText = 'position:absolute;left:-9999px';
+            document.body.appendChild(t);
             setTimeout(() => {
-                if (test.offsetHeight === 0 || test.clientHeight === 0 ||
-                    window.getComputedStyle(test).display === 'none') {
-                    adblockWarning.classList.add('show');
-                }
-                document.body.removeChild(test);
+                if (t.offsetHeight === 0 || window.getComputedStyle(t).display === 'none') adblockWarning.classList.add('show');
+                document.body.removeChild(t);
             }, 100);
         }
 
-        function setupAudioContext() {
-            try {
-                window.AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (window.AudioContext) {
-                    audioContext = new AudioContext();
-                }
-            } catch (e) {
-                logDebug("Web Audio API not supported");
-            }
-        }
+        function logDebug(msg, ...a) { if (DEBUG) console.log(`[QuranRadio] ${msg}`, ...a); }
 
-        function setupPreload() {
-            CAIRO_STREAM_URLS.forEach(url => {
-                try {
-                    const link = document.createElement('link');
-                    link.rel = 'preconnect';
-                    link.href = new URL(url, window.location.href).origin;
-                    document.head.appendChild(link);
-                } catch (e) {
-                    logDebug(`Invalid URL: ${url}`);
-                }
-            });
-        }
-
-        function logDebug(message, ...args) {
-            if (DEBUG) {
-                console.log(`[DEBUG] ${message}`, ...args);
-            }
-        }
-
-        // Initial status
+        // ============================================================
+        // BOOT
+        // ============================================================
         updateStatus("اضغط على الرمز ۞ لبدء الاستماع المباشر", "idle");
         broadcastStatus.textContent = "بث: جاهز";
-        
-        startReconnectLoop();
     </script>
 </body>
 </html>
-
