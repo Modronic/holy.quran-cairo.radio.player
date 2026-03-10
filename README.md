@@ -1,4 +1,4 @@
-# 🌙 Sakeena - Quran Radio App
+# 🌙 Sakeena Radio App - Inspired by Cairo Quran Radio Channel
             Live from Cairo, Egypt
 
 
