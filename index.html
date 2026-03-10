@@ -421,8 +421,6 @@
         const DEFAULT_VOLUME    = 0.85;
         const APP_VERSION       = '2.0.0';
         const CLICK_DEBOUNCE_MS = 300;
-        const FADE_STEPS        = 20;
-        const FADE_INTERVAL_MS  = 100; // 20 × 100ms = 2s fade
 
         // ============================================================
         // STATE
@@ -851,25 +849,6 @@
         }
 
         // ============================================================
-        // 2-SECOND AUDIO FADE OUT
-        // ============================================================
-        function fadeOutAndStop(cb) {
-            if (!audio || isIOS) { cb(); return; }
-            const start = audio.volume;
-            const step  = start / FADE_STEPS;
-            let   count = 0;
-            const t = setInterval(() => {
-                count++;
-                if (audio && count < FADE_STEPS) {
-                    audio.volume = Math.max(0, start - step * count);
-                } else {
-                    clearInterval(t);
-                    cb();
-                }
-            }, FADE_INTERVAL_MS);
-        }
-
-        // ============================================================
         // CONTROLS
         // ============================================================
         function startAudio() {
@@ -883,6 +862,26 @@
             updateStatus("جارٍ الاتصال...", "idle", 2000);
             setDot('yellow');
             initAudio();
+            // Fade-in: start silent, rise to saved volume over ~1.5s once playing
+            if (!isIOS) {
+                audio.volume = 0;
+                audio.addEventListener('playing', function fadeIn() {
+                    audio.removeEventListener('playing', fadeIn);
+                    const target = loadSavedVolume();
+                    const steps  = 15;
+                    const step   = target / steps;
+                    let   count  = 0;
+                    const t = setInterval(() => {
+                        count++;
+                        if (audio && count < steps) {
+                            audio.volume = Math.min(target, step * count);
+                        } else {
+                            clearInterval(t);
+                            if (audio) audio.volume = target;
+                        }
+                    }, 100); // 15 × 100ms = 1.5s
+                }, { once: true });
+            }
             audio.src = `${CAIRO_STREAM_URLS[currentServerIndex]}?t=${Date.now()}`;
             const p = audio.play();
             if (p) p.catch(e => { if (e.name !== 'AbortError') setTimeout(() => tryNextStream(), STREAM_TIMEOUT_MS); });
@@ -907,25 +906,25 @@
             if (sleepTimerInterval) { clearInterval(sleepTimerInterval);  sleepTimerInterval = null; }
             if (errorTimeout)       { clearTimeout(errorTimeout);         errorTimeout       = null; }
             if (stallTimeout)       { clearTimeout(stallTimeout);         stallTimeout       = null; }
-            fadeOutAndStop(() => {
-                destroyAudio();
-                isPlaying          = false;
-                isSwitchingServer  = false;
-                isInitializing     = false;
-                lastErrorTime      = 0;
-                isSleepTimerActive = false;
-                updateSleepTimerButton();
-                app.classList.remove('playing');
-                toggleBtn.innerHTML = '▶';
-                toggleBtn.classList.remove('stop');
-                setDot('');
-                syncMediaSession(false);
-                updateStatus("تم إيقاف البث", "idle", 2000);
-                broadcastStatus.textContent = "بث: جاهز";
-                broadcastStatus.className   = "broadcast-status";
-                networkWarning.classList.remove('show');
-                saveFlag('wasPlaying', false);
-            });
+
+            // Instant stop — no delay, no fade, immediate feedback
+            destroyAudio();
+            isPlaying          = false;
+            isSwitchingServer  = false;
+            isInitializing     = false;
+            lastErrorTime      = 0;
+            isSleepTimerActive = false;
+            updateSleepTimerButton();
+            app.classList.remove('playing');
+            toggleBtn.innerHTML = '▶';
+            toggleBtn.classList.remove('stop');
+            setDot('');
+            syncMediaSession(false);
+            updateStatus("تم إيقاف البث", "idle", 2000);
+            broadcastStatus.textContent = "بث: جاهز";
+            broadcastStatus.className   = "broadcast-status";
+            networkWarning.classList.remove('show');
+            saveFlag('wasPlaying', false);
         }
 
         function disableControls() {
