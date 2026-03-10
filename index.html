@@ -37,6 +37,7 @@
             display: flex;
             justify-content: center;
             align-items: center; /* always centred — works on watch too */
+            padding: 20px 0;
             padding: clamp(12px, 3vmin, 40px) 0;
             position: relative;
             -webkit-tap-highlight-color: transparent;
@@ -152,17 +153,21 @@
         .app-container {
             position: relative;
             z-index: 10;
-            width: min(95%, 500px); /* never wider than 500px, never wider than viewport */
+            width: 95%;
+            max-width: 500px; /* fallback for browsers without min() */
+            width: min(95%, 500px);
             background: rgba(15,23,42,0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 24px;
             border-radius: clamp(16px, 5vmin, 28px);
+            padding: 35px 28px;
             padding: clamp(20px, 6vmin, 45px) clamp(16px, 5vmin, 35px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.15);
             text-align: center;
             transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-            margin: auto; /* guarantees centering in all flex contexts */
+            margin: auto;
         }
         .app-container.playing {
             border-color: rgba(212,175,55,0.6);
@@ -172,8 +177,10 @@
         /* ── SYMBOL ── */
         .symbol-container {
             position: relative;
+            width: 150px; height: 150px;
             width: clamp(110px, 35vmin, 180px);
             height: clamp(110px, 35vmin, 180px);
+            margin: 0 auto 28px;
             margin: 0 auto clamp(18px, 5vmin, 35px);
             cursor: pointer;
             transition: transform 0.4s ease;
@@ -189,7 +196,7 @@
         }
         .circle { position: absolute; border: 2px solid rgba(212,175,55,0.7); border-radius: 50%; transition: all 0.6s ease; }
         .circle-1{width:100%;height:100%} .circle-2{width:85%;height:85%} .circle-3{width:70%;height:70%}
-        .symbol-core { font-size: clamp(32px, 10vmin, 52px); color:#D4AF37; transition:all 0.5s ease; text-shadow:0 0 15px rgba(212,175,55,0.6); pointer-events:none; }
+        .symbol-core { font-size: 44px; font-size: clamp(32px, 10vmin, 52px); color:#D4AF37; transition:all 0.5s ease; text-shadow:0 0 15px rgba(212,175,55,0.6); pointer-events:none; }
         .app-container.playing .circle { animation: pulse 3s infinite ease-in-out; }
         .app-container.playing .circle-1{animation-delay:0s} .app-container.playing .circle-2{animation-delay:.3s} .app-container.playing .circle-3{animation-delay:.6s}
         .app-container.playing .symbol-core { animation:breathe 4s infinite ease-in-out; color:#f8f4e6; text-shadow:0 0 25px rgba(255,244,220,0.8); }
@@ -197,13 +204,13 @@
         @keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
 
         /* ── TITLE ── */
-        .title { font-family:'Amiri',serif; font-size:clamp(1.6rem, 6vmin, 2.8rem); font-weight:700; background:linear-gradient(45deg,#D4AF37,#f3cf55,#D4AF37); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:clamp(6px,2vmin,12px); letter-spacing:1px; line-height:1.3; }
-        .subtitle { font-family:'Tajawal',sans-serif; font-weight:300; font-size:clamp(0.85rem, 3vmin, 1.25rem); color:rgba(255,255,255,0.85); margin-bottom:clamp(5px,1.5vmin,8px); letter-spacing:.5px; }
-        .date-row { font-size:clamp(0.6rem, 1.8vmin, 0.78rem); color:rgba(212,175,55,0.6); font-family:'Tajawal',sans-serif; margin-bottom:clamp(14px,4vmin,22px); }
+        .title { font-family:'Amiri',serif; font-size:2.3rem; font-size:clamp(1.6rem, 6vmin, 2.8rem); font-weight:700; background:linear-gradient(45deg,#D4AF37,#f3cf55,#D4AF37); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:10px; margin-bottom:clamp(6px,2vmin,12px); letter-spacing:1px; line-height:1.3; }
+        .subtitle { font-family:'Tajawal',sans-serif; font-weight:300; font-size:1.1rem; font-size:clamp(0.85rem, 3vmin, 1.25rem); color:rgba(255,255,255,0.85); margin-bottom:8px; margin-bottom:clamp(5px,1.5vmin,8px); letter-spacing:.5px; }
+        .date-row { font-size:0.72rem; font-size:clamp(0.6rem, 1.8vmin, 0.78rem); color:rgba(212,175,55,0.6); font-family:'Tajawal',sans-serif; margin-bottom:18px; margin-bottom:clamp(14px,4vmin,22px); }
         .date-row span { margin: 0 5px; }
 
         /* ── STATUS ── */
-        .status { min-height:28px; font-size:clamp(0.8rem, 2.5vmin, 1.05rem); font-family:'Amiri',serif; margin:0 0 clamp(14px,4vmin,22px); padding:clamp(5px,1.5vmin,8px) clamp(12px,3vmin,20px); border-radius:20px; background:rgba(30,41,59,0.7); transition:opacity .4s ease,transform .4s ease; opacity:1; transform:translateY(0); }
+        .status { min-height:28px; font-size:0.95rem; font-size:clamp(0.8rem, 2.5vmin, 1.05rem); font-family:'Amiri',serif; margin:0 0 18px; margin:0 0 clamp(14px,4vmin,22px); padding:7px 16px; padding:clamp(5px,1.5vmin,8px) clamp(12px,3vmin,20px); border-radius:20px; background:rgba(30,41,59,0.7); transition:opacity .4s ease,transform .4s ease; opacity:1; transform:translateY(0); }
         .status.fade-out { opacity:0; transform:translateY(-10px); }
         .status.idle         { color:rgba(255,255,255,0.6); border:1px dashed rgba(212,175,55,0.3); }
         .status.playing      { color:#D4AF37; background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.4); box-shadow:0 0 15px rgba(212,175,55,0.2); }
@@ -212,8 +219,8 @@
         .status.reconnecting { color:#a78bfa; background:rgba(124,58,237,0.1); border:1px solid rgba(124,58,237,0.3); }
 
         /* ── CONTROLS ── */
-        .controls-container { display:flex; justify-content:center; align-items:center; margin-top:clamp(10px,3vmin,15px); }
-        .control-btn { width:clamp(55px,14vmin,75px); height:clamp(55px,14vmin,75px); border-radius:50%; background:rgba(30,41,59,0.8); border:2px solid rgba(212,175,55,0.4); color:#D4AF37; font-size:clamp(1.2rem,4vmin,1.8rem); cursor:pointer; transition:all .3s ease; display:flex; justify-content:center; align-items:center; box-shadow:0 4px 15px rgba(0,0,0,0.3); font-family:'Tajawal',sans-serif; font-weight:600; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; outline:none; }
+        .controls-container { display:flex; justify-content:center; align-items:center; margin-top:12px; margin-top:clamp(10px,3vmin,15px); }
+        .control-btn { width:65px; height:65px; width:clamp(55px,14vmin,75px); height:clamp(55px,14vmin,75px); border-radius:50%; background:rgba(30,41,59,0.8); border:2px solid rgba(212,175,55,0.4); color:#D4AF37; font-size:1.5rem; font-size:clamp(1.2rem,4vmin,1.8rem); cursor:pointer; transition:all .3s ease; display:flex; justify-content:center; align-items:center; box-shadow:0 4px 15px rgba(0,0,0,0.3); font-family:'Tajawal',sans-serif; font-weight:600; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; outline:none; }
         .control-btn:hover { background:rgba(212,175,55,0.15); transform:scale(1.1); border-color:rgba(212,175,55,0.7); }
         .control-btn:active { transform:scale(0.95); }
         .control-btn.stop { background:rgba(153,27,27,0.2); border-color:rgba(239,68,68,0.5); color:#ef4444; }
@@ -221,17 +228,17 @@
         .control-btn:disabled { opacity:.5; cursor:not-allowed; pointer-events:none; }
 
         /* ── VOLUME ── */
-        .volume-container { display:flex; align-items:center; gap:clamp(6px,2vmin,12px); margin-top:clamp(16px,4vmin,22px); width:100%; max-width:320px; margin-left:auto; margin-right:auto; }
-        .volume-icon { color:#D4AF37; font-size:clamp(1rem,3vmin,1.4rem); min-width:24px; text-align:center; }
+        .volume-container { display:flex; align-items:center; gap:10px; gap:clamp(6px,2vmin,12px); margin-top:18px; margin-top:clamp(16px,4vmin,22px); width:100%; max-width:320px; margin-left:auto; margin-right:auto; }
+        .volume-icon { color:#D4AF37; font-size:1.2rem; font-size:clamp(1rem,3vmin,1.4rem); min-width:24px; text-align:center; }
         .volume-slider { width:100%; height:6px; -webkit-appearance:none; appearance:none; background:rgba(255,255,255,0.1); border-radius:3px; outline:none; transition:all .3s ease; -webkit-tap-highlight-color:transparent; }
-        .volume-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:clamp(16px,4vmin,20px); height:clamp(16px,4vmin,20px); border-radius:50%; background:#D4AF37; cursor:pointer; box-shadow:0 0 10px rgba(212,175,55,0.7); transition:all .2s ease; }
+        .volume-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:18px; height:18px; width:clamp(16px,4vmin,20px); height:clamp(16px,4vmin,20px); border-radius:50%; background:#D4AF37; cursor:pointer; box-shadow:0 0 10px rgba(212,175,55,0.7); transition:all .2s ease; }
         .volume-slider::-webkit-slider-thumb:hover  { transform:scale(1.25); background:#f3cf55; }
         .volume-slider::-webkit-slider-thumb:active { transform:scale(1.3); }
-        .volume-slider::-moz-range-thumb { width:clamp(16px,4vmin,20px); height:clamp(16px,4vmin,20px); border-radius:50%; background:#D4AF37; cursor:pointer; border:none; box-shadow:0 0 10px rgba(212,175,55,0.7); }
+        .volume-slider::-moz-range-thumb { width:18px; height:18px; width:clamp(16px,4vmin,20px); height:clamp(16px,4vmin,20px); border-radius:50%; background:#D4AF37; cursor:pointer; border:none; box-shadow:0 0 10px rgba(212,175,55,0.7); }
 
         /* ── ACTION BUTTONS ── */
-        .action-buttons { display:flex; justify-content:center; gap:clamp(6px,2vmin,10px); margin-top:clamp(12px,3vmin,18px); flex-wrap:wrap; }
-        .action-btn { background:rgba(30,41,59,0.8); border:1px solid rgba(212,175,55,0.4); color:#D4AF37; padding:clamp(7px,2vmin,10px) clamp(10px,3vmin,15px); border-radius:20px; cursor:pointer; font-size:clamp(0.75rem,2.2vmin,0.87rem); font-family:'Tajawal',sans-serif; transition:all .3s ease; display:flex; align-items:center; gap:5px; }
+        .action-buttons { display:flex; justify-content:center; gap:8px; gap:clamp(6px,2vmin,10px); margin-top:15px; margin-top:clamp(12px,3vmin,18px); flex-wrap:wrap; }
+        .action-btn { background:rgba(30,41,59,0.8); border:1px solid rgba(212,175,55,0.4); color:#D4AF37; padding:8px 12px; padding:clamp(7px,2vmin,10px) clamp(10px,3vmin,15px); border-radius:20px; cursor:pointer; font-size:0.82rem; font-size:clamp(0.75rem,2.2vmin,0.87rem); font-family:'Tajawal',sans-serif; transition:all .3s ease; display:flex; align-items:center; gap:5px; }
         .action-btn:hover  { background:rgba(212,175,55,0.15); transform:scale(1.05); }
         .action-btn:active { transform:scale(0.95); }
         .action-btn:disabled { opacity:.5; cursor:not-allowed; pointer-events:none; }
@@ -241,37 +248,37 @@
         @keyframes pulse-update { 0%,100%{box-shadow:0 0 10px rgba(34,197,94,0.3)}  50%{box-shadow:0 0 20px rgba(34,197,94,0.6)}  }
 
         /* ── PRAYER ── */
-        .prayer-times { margin-top:clamp(10px,3vmin,15px); font-size:clamp(0.72rem,2.2vmin,0.85rem); color:rgba(212,175,55,0.7); font-family:'Tajawal',sans-serif; }
+        .prayer-times { margin-top:12px; margin-top:clamp(10px,3vmin,15px); font-size:0.8rem; font-size:clamp(0.72rem,2.2vmin,0.85rem); color:rgba(212,175,55,0.7); font-family:'Tajawal',sans-serif; }
         .prayer-countdown { font-weight:600; color:#f59e0b; }
 
         /* ── INSTRUCTIONS ── */
-        .instructions { font-size:clamp(0.78rem,2.4vmin,0.95rem); color:rgba(255,255,255,0.7); margin-top:clamp(14px,4vmin,20px); line-height:1.6; font-style:italic; padding:clamp(10px,3vmin,15px); border-radius:clamp(10px,3vmin,16px); background:rgba(0,0,0,0.25); }
+        .instructions { font-size:0.85rem; font-size:clamp(0.78rem,2.4vmin,0.95rem); color:rgba(255,255,255,0.7); margin-top:16px; margin-top:clamp(14px,4vmin,20px); line-height:1.6; font-style:italic; padding:12px; padding:clamp(10px,3vmin,15px); border-radius:14px; border-radius:clamp(10px,3vmin,16px); background:rgba(0,0,0,0.25); }
 
         /* ── FOOTER ── */
-        .footer { margin-top:clamp(16px,4vmin,25px); font-size:clamp(0.65rem,2vmin,0.8rem); color:rgba(212,175,55,0.7); font-family:'Tajawal',sans-serif; letter-spacing:1px; padding-top:clamp(14px,3vmin,20px); border-top:1px solid rgba(255,255,255,0.1); }
+        .footer { margin-top:20px; margin-top:clamp(16px,4vmin,25px); font-size:0.72rem; font-size:clamp(0.65rem,2vmin,0.8rem); color:rgba(212,175,55,0.7); font-family:'Tajawal',sans-serif; letter-spacing:1px; padding-top:16px; padding-top:clamp(14px,3vmin,20px); border-top:1px solid rgba(255,255,255,0.1); }
         .broadcast-row { display:flex; justify-content:center; align-items:center; gap:7px; margin-top:8px; }
         .health-dot { width:8px;height:8px; border-radius:50%; background:rgba(255,255,255,0.15); flex-shrink:0; transition:background .4s,box-shadow .4s; }
         .health-dot.green  { background:#22c55e; box-shadow:0 0 7px rgba(34,197,94,0.8); }
         .health-dot.yellow { background:#f59e0b; box-shadow:0 0 7px rgba(245,158,11,0.8); animation:blink 1s infinite; }
         .health-dot.red    { background:#ef4444; box-shadow:0 0 6px rgba(239,68,68,0.7); }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
-        .broadcast-status { font-size:clamp(0.55rem,1.8vmin,0.65rem); color:rgba(255,255,255,0.4); font-family:'Tajawal',sans-serif; letter-spacing:.5px; }
+        .broadcast-status { font-size:0.6rem; font-size:clamp(0.55rem,1.8vmin,0.65rem); color:rgba(255,255,255,0.4); font-family:'Tajawal',sans-serif; letter-spacing:.5px; }
         .broadcast-status.active { color:rgba(212,175,55,0.8); }
 
         /* ── COMPAT / UTILITY ── */
-        .compat-info { margin-top:clamp(10px,3vmin,15px); font-size:clamp(0.6rem,1.8vmin,0.7rem); color:rgba(255,255,255,0.5); font-family:'Tajawal',sans-serif; line-height:1.4; }
-        .utility-buttons { display:flex; justify-content:center; align-items:center; gap:clamp(10px,3vmin,15px); margin-top:clamp(16px,4vmin,22px); }
-        .utility-btn { background:rgba(30,41,59,0.8); border:1px solid rgba(212,175,55,0.3); color:rgba(212,175,55,0.7); padding:clamp(6px,1.5vmin,8px) clamp(12px,3vmin,16px); border-radius:15px; cursor:pointer; font-size:clamp(0.7rem,2vmin,0.8rem); font-family:'Tajawal',sans-serif; transition:all .3s ease; }
+        .compat-info { margin-top:12px; margin-top:clamp(10px,3vmin,15px); font-size:0.65rem; font-size:clamp(0.6rem,1.8vmin,0.7rem); color:rgba(255,255,255,0.5); font-family:'Tajawal',sans-serif; line-height:1.4; }
+        .utility-buttons { display:flex; justify-content:center; align-items:center; gap:12px; gap:clamp(10px,3vmin,15px); margin-top:18px; margin-top:clamp(16px,4vmin,22px); }
+        .utility-btn { background:rgba(30,41,59,0.8); border:1px solid rgba(212,175,55,0.3); color:rgba(212,175,55,0.7); padding:7px 14px; padding:clamp(6px,1.5vmin,8px) clamp(12px,3vmin,16px); border-radius:15px; cursor:pointer; font-size:0.75rem; font-size:clamp(0.7rem,2vmin,0.8rem); font-family:'Tajawal',sans-serif; transition:all .3s ease; }
         .utility-btn:hover { background:rgba(212,175,55,0.1); color:rgba(212,175,55,0.9); }
 
         /* ── SLEEP TIMER MODAL ── */
         .sleep-timer-modal { position:fixed; top:0;left:0; width:100%;height:100%; background:rgba(0,0,0,0.82); display:none; justify-content:center; align-items:center; z-index:2000; }
         .sleep-timer-modal.show { display:flex; }
-        .sleep-timer-content { background:rgba(10,14,23,0.97); border:1px solid rgba(212,175,55,0.4); border-radius:clamp(16px,4vmin,22px); padding:clamp(20px,5vmin,30px) clamp(18px,5vmin,28px); text-align:center; max-width:min(320px, 90vw); width:90%; }
-        .sleep-timer-content h3 { color:#D4AF37; margin-bottom:6px; font-family:'Amiri',serif; font-size:clamp(1.1rem,3.5vmin,1.35rem); }
-        .sleep-timer-content p  { color:rgba(255,255,255,0.45); font-size:clamp(0.72rem,2vmin,0.8rem); margin-bottom:18px; font-family:'Tajawal',sans-serif; }
+        .sleep-timer-content { background:rgba(10,14,23,0.97); border:1px solid rgba(212,175,55,0.4); border-radius:20px; border-radius:clamp(16px,4vmin,22px); padding:26px 24px; padding:clamp(20px,5vmin,30px) clamp(18px,5vmin,28px); text-align:center; max-width:320px; width:90%; }
+        .sleep-timer-content h3 { color:#D4AF37; margin-bottom:6px; font-family:'Amiri',serif; font-size:1.2rem; font-size:clamp(1.1rem,3.5vmin,1.35rem); }
+        .sleep-timer-content p  { color:rgba(255,255,255,0.45); font-size:0.78rem; font-size:clamp(0.72rem,2vmin,0.8rem); margin-bottom:18px; font-family:'Tajawal',sans-serif; }
         .sleep-timer-options { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-        .sleep-timer-btn { background:rgba(30,41,59,0.8); border:1px solid rgba(212,175,55,0.4); color:#D4AF37; padding:clamp(10px,3vmin,13px) 10px; border-radius:14px; cursor:pointer; font-family:'Tajawal',sans-serif; font-size:clamp(0.82rem,2.5vmin,0.95rem); transition:all .3s ease; }
+        .sleep-timer-btn { background:rgba(30,41,59,0.8); border:1px solid rgba(212,175,55,0.4); color:#D4AF37; padding:12px 10px; padding:clamp(10px,3vmin,13px) 10px; border-radius:14px; cursor:pointer; font-family:'Tajawal',sans-serif; font-size:0.9rem; font-size:clamp(0.82rem,2.5vmin,0.95rem); transition:all .3s ease; }
         .sleep-timer-btn:hover { background:rgba(212,175,55,0.15); transform:scale(1.03); }
         .sleep-timer-btn.close { grid-column:1/-1; background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.35); color:#ef4444; }
 
@@ -478,7 +485,7 @@
         // ============================================================
         const isIOS        = /iPhone|iPad|iPod/i.test(navigator.userAgent);
         const isFirefox    = navigator.userAgent.toLowerCase().includes('firefox');
-        const isStandalone = window.matchMedia('(display-mode:standalone)').matches || !!window.navigator.standalone;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
 
         // ============================================================
         // INIT
@@ -507,12 +514,17 @@
                 volumeIcon.textContent = '📱';
                 volumeSlider.style.opacity = '0.5';
                 if (!isStandalone && !loadFlag('iosDismissed')) {
-                    setTimeout(() => iosInstallBanner.classList.add('show'), 4000);
+                    // Only show iOS install banner if resume prompt is NOT showing
+                    if (!loadFlag('wasPlaying')) {
+                        setTimeout(() => iosInstallBanner.classList.add('show'), 4000);
+                    }
                 }
             }
 
             if (loadFlag('wasPlaying')) {
                 setTimeout(() => resumeBanner.classList.add('show'), 700);
+                // Make sure iOS install banner never stacks on top of resume prompt
+                iosInstallBanner.classList.remove('show');
             }
 
             logDebug("App v" + APP_VERSION + " initialized");
@@ -585,12 +597,22 @@
 
         function updatePrayerCountdown() {
             if (!nextPrayerTime || !prayerTimings) { prayerCountdown.textContent = "جارٍ التحميل..."; return; }
-            const now    = new Date();
+
+            // Cairo is UTC+2 year-round (Egypt abolished DST in 2011)
+            // AlAdhan API returns times in Cairo local time — we must compare
+            // using Cairo time regardless of where the user is located
+            const CAIRO_OFFSET_MS = 2 * 60 * 60 * 1000;
+            const nowUTC          = Date.now();
+            const nowCairo        = new Date(nowUTC + CAIRO_OFFSET_MS);
+            const todayCairo      = new Date(nowCairo);
+            todayCairo.setUTCHours(0, 0, 0, 0);
+
             const [h, m] = nextPrayerTime.split(':').map(Number);
-            const target = new Date(now);
-            target.setHours(h, m, 0, 0);
-            if (target < now) target.setDate(target.getDate() + 1);
-            const diff   = target - now;
+            const prayerUTC = todayCairo.getTime() + (h * 60 + m) * 60000;
+            // If prayer time already passed today in Cairo, use tomorrow
+            const targetUTC = prayerUTC > nowUTC ? prayerUTC : prayerUTC + 86400000;
+
+            const diff = targetUTC - nowUTC;
             if (diff <= 0) {
                 if (nextPrayerName !== adhanShownFor && !nextPrayerName.includes('غدًا')) {
                     adhanShownFor = nextPrayerName;
@@ -671,17 +693,22 @@
         // ============================================================
         function setupMediaSession() {
             if (!('mediaSession' in navigator)) return;
-            const art = "data:image/svg+xml," + encodeURIComponent(
+            // PNG artwork: solid dark background with gold ۞ — renders on all Android/iOS lock screens
+            const pngArt = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAAS6UlEQVR42u3dMZIbZRAGUFm1JqFcDl1FSOgrOOEohA44AxkncOKcgxD5FIQcYYsEUxSBE4NWu7PSaKa7v/dCAqyd6e7v75F29eL1m7cHAPIcXQIAAQCAAABAAAAgAAAQAAAIAAAEAAACAAABAIAAAEAAACAAABAAAAgAAAQAAAIAAAEAgAAAQAAAIAAAEAAACAAABACAAABAAAAgAAAQAAAIAAAEAAACAAABAIAAAEAAACAAABAAAAgAAAQAAAIAAAEAgAAAQAAAIAAAEAAACAAABAAAAgBAAAAgAAAQAAAIAAAEAAACAAABAIAAAKCLO5eAeT59fHWL/+279/euLZO8eP3mrauAES8eEABg1ksFBAAY9yIBAQAmvjxAAIChLwwQAGDoCwMEABj6wgABACXm/upDc+QPhQAQAPQbkQVHYfiPjwDA3DfvXBkEAOa+oeaiIQAwwgwvFxMBgFFlTrnCCADyBpOR5JojAAiaQQaQG4EAIGviGDfuCwKArBFjvrhNCAAMFNw4BABzJ4jx4T4iAMgaGeaF24oAwIzALUYAMHouGAruOAIAgwB3HwHA6P7X+SpBJQgANDyqQlUIADQ5KgQBgMZGtSAA6N3PmhllIwDQwyghJSQA0LcoJ+UkABjWrnoVdYUA0KKgxjgcXQKdCddXzi2+4B4bAEY/qg4BoA8X96EmRPkhABzBQB0iAJy8QEEiAOY1m05DZSIAnLNAiSIAHK9cw5W4zmpVAKCjJk952aBiBQAayayXCqpXAKB/THx5oIYFADrH0BcGKlkAoGEMfWGgqgUA+qTw0F/xovV6tWobAaBDIub+7hdn3k+kwgUAJXpjTGOsNSVbXJCoH1apCwC0xK1GoYuQcxFkgAAw/Sc0wzUjz4dkkqtCBgiA9OmfOfoDOz/zWs2ufwFA6AnognGm1TOvnlVAAOjwIUVv7rue2kEAEFfuzx1V+tnllQECQCe3L3TfC+hqaw0BQFyJ+wIQF1+DCADWKW6jHzfi4KNBAsD0N3FIvikyQACY/i2njM50j3SNAGBOHRv9YkDvCADiKtjoFwM6SABg+mu/sTEgAxAAqtboFwO6SQAQXK9GvxjQUwIA01+PqU+vXACwapnWrFGtpUoHFKoqvdLRJTD99VWCJ+/pBl98v/rLrvmabQCmf9ExavTTsQbsAQLA9NdFqF7VuyaPgPSP/knU7tGKZ0E2AMPU6EcxK2YbQNUS1N5YBfSmDSB0+pcaqY+8WqOfptXigww2gJaHqY2bxPRnrep9vJxiu0wAOCIVnf76h9Vna5cM8CBoOY+Agqa/0c+kKnLQsQEoNdOfTY/Y9gABQLnB6qE/W2ZAkfGqsAXAzsf/+gd/TcLF47XFKmAJuJj3AK6qoQqz1cH/plPANaxfY94MEACmf3rdb3zcc3llgABQ9F6e7d411w4CwPG/xssbXOuNHukG3oWyHSEDBIDpnzv0r7wmu78AGSADBIAyypr+F4zdjX/8+q9QBsgAAbByDZn+RaZqx29bC7lZlTNAAAiAxieIqdN/4ehs9GPO+4kaFaQlQACY/kOm5IB2nf1jygABEBEApv+WM3Fki079qdtlgAAQAKa/Ceg6yAABIABq74wzpr+VfPxlKVioqk4A9D4sDJj+mjDnEvXKALUnAEx/veeKyQABoOuKlUjr6a/lkq9etdK1gz7C9wEcTP/NXrzpv7Dqzl2oFn8NqdqLV3U2gE6nrb7TP/Dv07mkA/aA5Pq802N2EaO/+H0/vbxf/kvly/vu/b0v5LIBOP6v8JIq97nR71J3qWdLwKmjdtItq79g0/9GZ+oHL2zlg3aXFxy7rHgTuMpxoFcJfvr4ql1cDS7Oc7fD8UtxPi70EVC1ZbDXdm/0uwt9y9uDIBuARWTN/vHMZ6/yOL3sNfcA5WEDcPxvf5Rz8LcKzHidlgAbgK5w8LcK7L8H+KioAMgN/y7V/+D01zzFx2vf6tolijIDKSsAWqx+pWbrgx8vMf0bZUCpidaiy6IywCOgWmlUbfovedpAqQlbfBXwIEgAOP53nf4apu8qIAMsATaA6lFk+pOQAeFjVwBEH/8rv4zTa+WxT98M+N+NqzNh6zddSBrZAEpEUZF+OH3P0OgftgrUeVvYmwECIO74X3z6l11KWHfUygBLgA0A018GYANw/M8+/pv+MsASkLkE2ABMf9NfBqRngA3A8V8suSwywGXJiiIbQO7x3/Q37IrMOEuAAKgS+CEvwPSXAfUzIOoFCIAtzt2xL8P0p3gGaGEBMC3qW/y5f9NfBpR9PVsOX18J6fg/n9/15dzd1zVp8+QYXvFpx3/Tn8oZYAkQAJPj2vRHBjQdwSOXAB8DTSkX058uGRAyfAVA1uFix3/d9KdRBsT2qQAYcliofGAx/elYG/paADhWqFoiKscSsI07JTt74BZ5+PPNy8NvH+TQIp//Pvzw024D6N37+69r5tPHV6W+q67Cr9BPigdvAk8+UHj0z/XluteBRrkKgH7F5BOo6JcB/RXSL6MCoObwLXL8h3a1VHMKT+qsiA0g8Pjv4Q/rdk3Z2rYECADZY/ozMwNUrwDocfr2AAonGM0uAFRwoeM/dK+utBYWABpjnZfh+M/qQ9CXtAgA87fB2cH0RzFLoOgNIGoIOhOh0syQZ7lTzfaPIn785c/f//hnfLV8/93x15+/7TgHC/6NaGuuDcD8dfxnftN5CiQAKlaM+CFE7Age3FA+BTTt+G/6s01tWwIEQPoW5q9Pk0z9d+++sRvAXocFX2SBBVdfCwAcQFCBCADbn0MKlgBzQADYE1UelgDdLQBQnag3BIBTj+M/2kE7CIC+t9wfrcUSkFnwfePnqC6FH6jJzNniEVD7Wnf8R+05FQkAnQA6joAASE57f/mHmoNYVwqA+ecCmybETuFhRy6PgJrVhPjBQdj6KwDQAKhD8gLAKRgwl2wAW59E6vzZKccuarbe+D/NNqn1PAJSDaD7QgkAAAFAbZ7/0OUw7l06AbDFHNz9nzaIoU7wFBwRAmC3OgAwbSICYDbPf+g1Fj0FEgAACIBZZ3BAtwoAC+/W1ez5D12aYrMprClSAkCwA2aUDcARADBzBAAAAmDeWucNAPoejf1OlgCwAAL6UQAAIAAAEABLnXuoN3j78wYAHYX8TYhzLdnoR7YBANgAABAAPL7QeRoD1ZT6YgABAIAAAEAAsJyPANGXL4cRAAAIAAAEAAAC4Bk8RgTMKxvAf3h3FDB/QgNg+yQXOdBlHHtyIAAAEAA9Nw87B93P407iAgAAAQCAAABAAAAgAAAQAAAIAAAEAAACAAABAIAAAEAAACAAABAAAAIAAAEAgAAAQAAAIAAAEAAACABW5wu16e7ruv26nhEAAAiAPidx53HosnPYPCICwDgGzJ/hASDJAfPKBgCAAABAAAAgAIbwqwD05ZcABAAAAgAAAdCO3wWD+vwWmAAAQAAAMCYAzi10gx/I+CAQHYV8BOhcSzb6kW0AADYAAAQAF29/gH4UAKPs+FDP2wD0ncVFGgcBAMDEAHA0Bsyc4QFgrQPMKBtA0BHA2wB0bIrNRqGmEACCHdCtAgAAATDyRGPhpSZfAiMAShQfgGkzMABK/WqJ1IFqs9hvnyVuAON5CkSXQez5jwAAQACEbaCA7hMAA6th393WUyDqt16dHpE6MwPAE0bAXLIBOHaBOkQAZDSA7QenYMEjAHarCSMYYuNnWOoc3enWP7tDEHWOXLpSAGgDQMcJAGmvEzCFncEFgIGo1lGTZosAGFtwOxaHJQAFbxbZAIJuuSUA7aAdBACWANQbAmDv6tz433XqIfD4H9LdAqD6BPQmBI7/5kDrc5hHQA5foAJDjQ2AzD3REoAK11lBAWD7cwRD/es+G0DuEclfB2L72t5+9qltAVCuXAoeAfQJIXW1TfcNbqgJAWAEHzwIYnq9xcaPANAMziyoKIceAWAO6gdUmhkiAJzBhR+K2cwRAKrh4ZchA1h9+NYsdQRAubPDLv+0xmBYdfm70wKgweCrOXktAcyrH80uAPTP0uqUAaxSvWnH/wTHwDpOOBfIAAZM/327LKFrRgWAhzAjt1RiO8sDKAFgCXCcQbU4/gsA7XRdt8gALihXx38BYFftugTIADpOf90tAEYdKHb8170ZQLvK8cVKAsAxQXGjNvS1AHCsWLVwZQBP1qfjvw2AOYcFGUCL6R9y9BYAieWy79iVAdSf/j6BKgCGlNeDFSMDMP2f1Z5bvqS0jhgbAHZGGUCv6W+eCABLgKWb0Pvu+C8ABoZ2wbPD6UuSAaZ/i0LVwgJgQtTv/gJkgOlfasZpSQGQtYvIAEz/RwrPGxIC4Ia7m2EnA0x/c/bJsp99fWwA0UuADDD9aw5fsSQApi0BMgDTv+D0jz3+2wCQAaY/NgBLQPYSIANMf8f/wIy0AZRIozoZ4PeEZ0//01ucPP1JCYD6HweqM2pPM0AMNB39Zf/SQ/2mC4kiG0CtNCr7CmVA64N/06rj1l68fvM2uSt2LL76K/CKQ+Sbl4ffPoiQRT7/ffjhp/siN25w5Tv+2wDKnXdKHbQf3AOsAsWPOKY/AuDZwV5nrlXLAI+D+i64dd7ybdRlUWkUtwGUyoAupSYDmk7/7i1p+guAxEAqOF49Dqo8+ltMfw9/BIAloHcGWAVaHPxNf8d/ATCwt60CtDv4OyUIAEvAha+nSwaIgd1Hf7vp7/gvABy9u9bfuecMMmCX4qz52KdatStOAVB64LYbqVYBB//L4so0KCLrN4FbrIQdPyzx5JrvN4GXO/1N4FJPUZpWsoc/D7rTb12CqnKZfnltpz325b+8e3//12cf+LtJsnY8WmEDsATMbPvuL95lHPniHf/P8SZwxVNMrw8FLX/xToULq870t4vYANIPCN2P0o5dgVesYNGqQwEgA4puUTpw0iUy/QWAJpQBYiDxsvSa/gJAALQ5LIx5W/XJp7EhPTnvOtQsUcd/ASADTEA/telv+guA5jvjvI9XLvl4xoBenf1jtpv+AkAAyIB+I/Iw6K3v8TfO9BcAM+fR7tUz+9esln9ku8ufvA+8WWV7xPQXABNOEAm/anvBL+9s/OPXf4WmvwAQADIgLgnWvSa7vwDT3/QXAIopNwNWnMWbCbwLpr8ACJo4Feop+Vlnze9M1g5engCwBCj6+ZHg8nZpBAEgAGSAO2jQm/4IABkApj+Hw8H3Acw4Az7yCv0Vfq6Zra3PFqa/AKj+hGHFWn88BtwpVjz4F5mtClsA7H+UqFOFMoANpn+Ls5fj/xLeAxhYcBoDRe5W2gDsAVYBTH8EQIG63DgDPA5ireqt89Bf9a7LI6D166/UAcRZiUlF4kvlbAD7H67HvFqHKSYdEUx/G4C2sQqghrEBOFlbBTD9sQEoyoWDXiOFF63pLwAYXppiQK2OKVe1eg2PgK7V8dHKkz3jiZDpb/rbABh+oLYKqE/1KQDQY9ossSxNfwEgANSrGDD6dZMAILtqxYDRr48EADJADMwc/aY/AkAFiwGjX+8gANSxGDD6dY0AQDVfM2L0p5uiXwQAM2taDLgROkUAsH67igGMfrUkAGTAtEmke11t018A6OGBhf7cvxekk11e018A6OdR5X7Bn43T1a6n6S8A9PaoopcErp5GEABcW/2tS//ivyMd2PCZ18oHfgSADHgV3uTJ/R97cRz8BQBZzXD9F8u4CDkXwfQXADJgZkus9RVjk/6Ehrtv+gsAGXCI6o3Vv2xy94sz7ydS4QIAHdJsbt70ovV6tWobAaBPhEF17qnpLwDQMEFh4A4a/QIAnRMUBm6Z6S8A0D8peeAGuTgCAI00PxXcBRUrANBRk7PBdVarAoCi80troUQRAI5XoDIRAM5ZoCARAFEtp+tQhwgAJy9QfggARzBQdQgADQkqjS+OLkFHz+q02D+1humPDUCLalHUFQIgvle1K8oJAaBv9S1KSAAIAD2MslE2AoDAZtbPqkW1CAA0tsZWISpEAKDJURWqQgCg4VEJCACyOl//u/vuvgDAIDAI3HEEANlDwVxwixEAmBFmhNuKACB4XhgZ7iMCgPTxYYK4cQgADBQDxW1CAJA9X4wY9wUBQPq4MXHcCAQABpAZ5JojAIgfSQaTK4wAwJxKH1UuJgIAwytlhLloCAAMtYjp5sogAJAEEYMv/MdHAMDWo3CzETnyh0IACAAmJ8EA5j4CAGFg6IMAQBgY+iAAEAaGPggA5IGJDwIAkWDcgwBAKpj1IAAQD0Y8CACAeEeXAEAAACAAABAAAAgAAAQAAAIAAAEAgAAAQAAAIAAAEAAACAAABAAAAgAAAQCAAABAAAAgAAAQAAAIAAAEAAACAAABACAAABAAAAgAAAQAAAIAAAEAgAAAQAAAIAAAEAAACAAABAAAAgAAAQCAAABAAAAgAAAQAAAIAAAEAAACAAABAIAAABAAAAgAAAQAAAIAAAEAgAAAQAAA0NC/FEPmwjQafq4AAAAASUVORK5CYII=";
+            const svgArt = "data:image/svg+xml," + encodeURIComponent(
                 "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>" +
                 "<rect width='512' height='512' fill='%230f172a'/>" +
                 "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='300' fill='%23D4AF37'>۞</text>" +
                 "</svg>"
             );
             navigator.mediaSession.metadata = new MediaMetadata({
-                title:   'إذاعة القرآن الكريم',
-                artist:  'القاهرة • بث مباشر',
-                album:   'Holy Quran Radio',
-                artwork: [{ src: art, sizes: '512x512', type: 'image/svg+xml' }]
+                title:   'Sakeena Radio',
+                artist:  'إذاعة القرآن الكريم • القاهرة',
+                album:   'بث مباشر',
+                artwork: [
+                    { src: pngArt, sizes: '512x512', type: 'image/png' },
+                    { src: svgArt, sizes: '512x512', type: 'image/svg+xml' }
+                ]
             });
             navigator.mediaSession.setActionHandler('play',  () => { if (!isPlaying) startAudio(); });
             navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying)  stopAudio();  });
@@ -985,16 +1012,19 @@
         }
 
         // ============================================================
-        // SHARE — Native share sheet → clipboard → prompt fallback
+        // SHARE — Smart: native sheet on mobile, clipboard on desktop
         // ============================================================
+        // Desktop browsers (non-touch) don't benefit from navigator.share —
+        // the Windows/macOS share dialog is unfamiliar to most users.
+        // On desktop: go straight to clipboard with clear confirmation.
+        // On mobile: native share sheet (WhatsApp, iMessage, etc.)
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
         async function handleShare() {
             if (!canAct(lastShareClickTime, 2000)) return;
             lastShareClickTime = Date.now();
 
-            // Resolve the best URL to share:
-            // 1. SHARE_URL constant if set by owner
-            // 2. Current URL if it looks like a real hosted page (https)
-            // 3. GitHub Pages canonical fallback
+            // Resolve best URL to share
             let urlToShare = SHARE_URL;
             if (!urlToShare) {
                 const loc = window.location.href;
@@ -1003,27 +1033,53 @@
                     : 'https://sakeena-radio.github.io/sakeena/';
             }
 
-            const data = {
+            const shareData = {
                 title: 'Sakeena Radio — إذاعة القرآن الكريم',
                 text:  'استمع إلى القرآن الكريم من القاهرة — بث مباشر مجاني على أي جهاز',
                 url:   urlToShare
             };
 
-            if (navigator.share) {
+            // Mobile: use native share sheet
+            if (isTouch && navigator.share) {
                 try {
-                    await navigator.share(data);
+                    await navigator.share(shareData);
                     updateStatus("تمت المشاركة 🤍", "info", 2000);
                     return;
                 } catch(e) {
                     if (e.name === 'AbortError') return; // user dismissed — fine
+                    // Fall through to clipboard if share fails
                 }
             }
-            // Clipboard fallback
+
+            // Desktop (or mobile share fallback): copy to clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(urlToShare);
+                    updateStatus("تم نسخ الرابط للحافظة ✓", "info", 2000);
+                    return;
+                } catch(e) { /* fall through */ }
+            }
+
+            // Last resort — works on every browser including old IE/Edge
             try {
-                await navigator.clipboard.writeText(urlToShare);
-                updateStatus("تم نسخ الرابط للحافظة", "info", 2000);
+                const success = document.execCommand
+                    ? (() => {
+                        const ta = document.createElement('textarea');
+                        ta.value = urlToShare;
+                        ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
+                        document.body.appendChild(ta);
+                        ta.select();
+                        const ok = document.execCommand('copy');
+                        document.body.removeChild(ta);
+                        return ok;
+                    })()
+                    : false;
+                if (success) {
+                    updateStatus("تم نسخ الرابط للحافظة ✓", "info", 2000);
+                } else {
+                    window.prompt("انسخ الرابط:", urlToShare);
+                }
             } catch(e) {
-                // Last resort — works on every browser including IE
                 window.prompt("انسخ الرابط:", urlToShare);
             }
         }
@@ -1132,7 +1188,7 @@
                     });
                     document.addEventListener('touchstart', unlock, { once:true, passive:true });
                     document.addEventListener('touchend',   unlock, { once:true, passive:true });
-                    document.addEventListener('click',      unlock, { once:true });
+                    document.addEventListener('click',      unlock, { once:true, passive:true });
                 }
                 // iOS silent oscillator: keeps AudioContext alive when screen locks
                 if (isIOS) {
