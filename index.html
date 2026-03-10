@@ -14,10 +14,14 @@
     <meta property="og:description" content="استمع إلى القرآن الكريم من القاهرة — بث مباشر مجاني على أي جهاز">
     <meta property="og:type"        content="website">
     <meta property="og:url"         content="https://sakeena-radio.github.io/sakeena/">
+    <meta property="og:image"       content="https://sakeena-radio.github.io/sakeena/og-image.png">
+    <meta property="og:image:width"  content="512">
+    <meta property="og:image:height" content="512">
     <meta property="og:locale"      content="ar_EG">
     <meta name="twitter:card"        content="summary">
     <meta name="twitter:title"       content="إذاعة القرآن الكريم">
     <meta name="twitter:description" content="بث مباشر للقرآن الكريم من القاهرة">
+    <meta name="twitter:image"       content="https://sakeena-radio.github.io/sakeena/og-image.png">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>۞</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>۞</text></svg>">
     <title>إذاعة القرآن الكريم | Holy Quran Radio</title>
@@ -243,9 +247,7 @@
         .action-btn:active { transform:scale(0.95); }
         .action-btn:disabled { opacity:.5; cursor:not-allowed; pointer-events:none; }
         .action-btn.sleep-active  { background:rgba(245,158,11,0.2); border-color:rgba(245,158,11,0.6); color:#f59e0b; animation:pulse-sleep 2s infinite; }
-        .action-btn.update-available { background:rgba(34,197,94,0.2); border-color:rgba(34,197,94,0.6); color:#22c55e; animation:pulse-update 2s infinite; }
         @keyframes pulse-sleep  { 0%,100%{box-shadow:0 0 10px rgba(245,158,11,0.3)} 50%{box-shadow:0 0 20px rgba(245,158,11,0.6)} }
-        @keyframes pulse-update { 0%,100%{box-shadow:0 0 10px rgba(34,197,94,0.3)}  50%{box-shadow:0 0 20px rgba(34,197,94,0.6)}  }
 
         /* ── PRAYER ── */
         .prayer-times { margin-top:12px; margin-top:clamp(10px,3vmin,15px); font-size:0.8rem; font-size:clamp(0.72rem,2.2vmin,0.85rem); color:rgba(212,175,55,0.7); font-family:'Tajawal',sans-serif; }
@@ -285,9 +287,6 @@
         /* No fixed media query breakpoints needed — clamp() handles everything
            from 200px smartwatch screens to 4K displays automatically */
 
-        .spinner { display:inline-block; width:20px;height:20px; border:3px solid rgba(212,175,55,0.3); border-radius:50%; border-top-color:#D4AF37; animation:spin 1s linear infinite; margin-right:8px; }
-        @keyframes spin { to { transform:rotate(360deg); } }
-
     </style>
 </head>
 <body>
@@ -321,7 +320,7 @@
     <!-- ── MAIN CARD ── -->
     <div class="app-container" id="app">
 
-        <div class="symbol-container" id="playButton">
+        <div class="symbol-container" id="playButton" role="button" tabindex="0" aria-label="تشغيل / إيقاف البث">
             <div class="symbol">
                 <div class="circle circle-1"></div>
                 <div class="circle circle-2"></div>
@@ -340,7 +339,7 @@
         <div class="status idle" id="status">اضغط على الرمز ۞ لبدء الاستماع المباشر</div>
 
         <div class="controls-container">
-            <div class="control-btn" id="toggleBtn">▶</div>
+            <div class="control-btn" id="toggleBtn" role="button" tabindex="0" aria-label="تشغيل / إيقاف">▶</div>
         </div>
 
         <div class="volume-container">
@@ -352,7 +351,6 @@
             <button class="action-btn" id="shareBtn">📤 مشاركة</button>
             <button class="action-btn" id="sleepTimerBtn">⏰ مؤقت</button>
             <button class="action-btn" id="installBtn" style="display:none;">📱 تثبيت</button>
-            <button class="action-btn" id="updateBtn"  style="display:none;">🔄 إصدار جديد</button>
         </div>
 
         <div class="prayer-times">
@@ -414,7 +412,7 @@
         const STREAM_TIMEOUT_MS = 3000;
         const RECONNECT_LOOP_MS = 5000;
         const DEFAULT_VOLUME    = 0.85;
-        const APP_VERSION       = '2.3.0';
+        const APP_VERSION       = '2.5.1';
         const CLICK_DEBOUNCE_MS = 300;
         // ⚙️ Set this to your GitHub Pages / hosting URL once deployed
         // Leave empty to auto-detect from window.location
@@ -431,7 +429,7 @@
         let isDestroyingAudio       = false;
         let lastErrorTime           = 0;
         let stallTimeout            = null;
-        let errorTimeout            = null;
+        let guardTimer              = null;   // clears isSwitchingServer guard in tryNextStream
         let isInitializing          = false;
         let lastClickTime           = 0;
         let lastShareClickTime      = 0;
@@ -444,7 +442,6 @@
         let isSleepTimerActive      = false;
         let deferredPrompt          = null;
         let isPWAInstalled          = false;
-        let isOnline                = navigator.onLine;
         let prayerCountdownInterval = null;
         let nextPrayerTime          = null;
         let nextPrayerName          = '';
@@ -559,16 +556,23 @@
         // ============================================================
         async function loadCairoPrayerTimes() {
             try {
-                const d   = new Date();
+                // Always use Cairo's date (UTC+2) — never the user's local date
+                const CAIRO_OFFSET_MS = 2 * 60 * 60 * 1000;
+                const nowCairo = new Date(Date.now() + CAIRO_OFFSET_MS);
+                const dd = nowCairo.getUTCDate();
+                const mm = nowCairo.getUTCMonth() + 1;
+                const yy = nowCairo.getUTCFullYear();
                 const res = await fetch(
-                    `https://api.aladhan.com/v1/timingsByCity/${d.getDate()}-${d.getMonth()+1}-${d.getFullYear()}?city=Cairo&country=Egypt&method=5`
+                    `https://api.aladhan.com/v1/timingsByCity/${dd}-${mm}-${yy}?city=Cairo&country=Egypt&method=5`
                 );
                 const data = await res.json();
                 if (data.code === 200) {
-                    prayerTimings = data.data.timings;
-                    const info    = getNextPrayer(prayerTimings);
+                    prayerTimings  = data.data.timings;
+                    adhanShownFor  = '';            // reset so new day's prayers all fire correctly
+                    const info     = getNextPrayer(prayerTimings);
                     nextPrayerName = info.name;
                     nextPrayerTime = info.time;
+                    scheduleMidnightReload();       // ensure data refreshes at Cairo midnight
                 } else {
                     prayerCountdown.textContent = "غير متاح";
                 }
@@ -578,10 +582,31 @@
             }
         }
 
+        // Schedule a silent prayer-times reload at Cairo midnight so overnight
+        // listeners always see today's correct prayer schedule
+        let midnightReloadTimer = null;
+        function scheduleMidnightReload() {
+            if (midnightReloadTimer) clearTimeout(midnightReloadTimer);
+            const CAIRO_OFFSET_MS = 2 * 60 * 60 * 1000;
+            const nowCairo = new Date(Date.now() + CAIRO_OFFSET_MS);
+            // ms remaining until next Cairo midnight
+            const msUntilMidnight = ((24 - nowCairo.getUTCHours()) * 3600
+                - nowCairo.getUTCMinutes() * 60
+                - nowCairo.getUTCSeconds()) * 1000 + 5000; // +5s buffer
+            midnightReloadTimer = setTimeout(() => {
+                loadCairoPrayerTimes().then(() => {
+                    updatePrayerCountdown();
+                    startPrayerCountdownUpdates();
+                });
+            }, msUntilMidnight);
+        }
+
         function getNextPrayer(t) {
-            const now = new Date();
-            const cur = now.getHours() * 60 + now.getMinutes();
-            const list= [
+            // Compare against Cairo time (UTC+2) — prayer times from API are in Cairo local time
+            const CAIRO_OFFSET_MS = 2 * 60 * 60 * 1000;
+            const nowCairo = new Date(Date.now() + CAIRO_OFFSET_MS);
+            const cur = nowCairo.getUTCHours() * 60 + nowCairo.getUTCMinutes();
+            const list = [
                 {name:'الفجر',  time:t.Fajr},
                 {name:'الظهر',  time:t.Dhuhr},
                 {name:'العصر',  time:t.Asr},
@@ -646,12 +671,10 @@
         // ============================================================
         function setupNetworkMonitoring() {
             window.addEventListener('offline', () => {
-                isOnline = false;
                 setDot('red');
                 if (isPlaying) { networkWarning.classList.add('show'); updateStatus("انقطع اتصال الإنترنت","error",3000); }
             });
             window.addEventListener('online', () => {
-                isOnline = true;
                 networkWarning.classList.remove('show');
                 if (!prayerTimings) loadCairoPrayerTimes().then(() => { updatePrayerCountdown(); startPrayerCountdownUpdates(); });
                 if (!isPlaying && hasAttemptedPlay && !userPausedIntentionally && !isSleepTimerActive) {
@@ -671,7 +694,7 @@
                 statusEl.textContent = text;
                 statusEl.className   = `status ${cls}`;
                 statusEl.classList.remove('fade-out');
-                if (cls !== 'playing' && cls !== 'sleep-timer') {
+                if (cls !== 'playing') {
                     window._sClear = setTimeout(() => {
                         statusEl.textContent = isPlaying ? "الاستماع جارٍ الآن" : "اضغط على الرمز ۞ لبدء الاستماع المباشر";
                         statusEl.className   = `status ${isPlaying ? 'playing' : 'idle'}`;
@@ -759,6 +782,7 @@
         // PLAYBACK EVENT HANDLERS
         // ============================================================
         function onPlaying() {
+            if (guardTimer) { clearTimeout(guardTimer); guardTimer = null; }
             isPlaying         = true;
             isSwitchingServer = false;
             app.classList.add('playing');
@@ -820,13 +844,13 @@
             stopReconnectLoop();
             isSwitchingServer = true;
             setDot('yellow');
-            const guard = setTimeout(() => { if (isSwitchingServer) { isSwitchingServer = false; logDebug("Guard: reset isSwitchingServer"); } }, 10000);
+            guardTimer = setTimeout(() => { if (isSwitchingServer) { isSwitchingServer = false; logDebug("Guard: reset isSwitchingServer"); } guardTimer = null; }, 10000);
             updateStatus("جارٍ الاتصال بالبث الاحتياطي...", "reconnecting", 2000);
             destroyAudio();
             initAudio();
             currentServerIndex = (currentServerIndex + 1) % CAIRO_STREAM_URLS.length;
             if (currentServerIndex === 0) {
-                clearTimeout(guard);
+                if (guardTimer) { clearTimeout(guardTimer); guardTimer = null; }
                 stopAudioInternal();
                 updateStatus(navigator.onLine ? "حدث خطأ فني. يرجى المحاولة لاحقًا." : "لا يوجد اتصال بالإنترنت", "error", 4000);
                 broadcastStatus.textContent = "بث: غير متصل";
@@ -928,9 +952,9 @@
             hasAttemptedPlay        = false;
             userPausedIntentionally = true;
             stopReconnectLoop();
-            if (sleepTimerTimeout)  { clearTimeout(sleepTimerTimeout);   sleepTimerTimeout  = null; }
+            if (guardTimer)         { clearTimeout(guardTimer);           guardTimer         = null; }
+            if (sleepTimerTimeout)  { clearTimeout(sleepTimerTimeout);    sleepTimerTimeout  = null; }
             if (sleepTimerInterval) { clearInterval(sleepTimerInterval);  sleepTimerInterval = null; }
-            if (errorTimeout)       { clearTimeout(errorTimeout);         errorTimeout       = null; }
             if (stallTimeout)       { clearTimeout(stallTimeout);         stallTimeout       = null; }
 
             // Instant stop — no delay, no fade, immediate feedback
@@ -1012,14 +1036,9 @@
         }
 
         // ============================================================
-        // SHARE — Smart: native sheet on mobile, clipboard on desktop
+        // SHARE — Universal: native share sheet on any OS that supports it
+        // (Windows 10/11, macOS, Android, iOS) → clipboard copy → prompt fallback
         // ============================================================
-        // Desktop browsers (non-touch) don't benefit from navigator.share —
-        // the Windows/macOS share dialog is unfamiliar to most users.
-        // On desktop: go straight to clipboard with clear confirmation.
-        // On mobile: native share sheet (WhatsApp, iMessage, etc.)
-        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
         async function handleShare() {
             if (!canAct(lastShareClickTime, 2000)) return;
             lastShareClickTime = Date.now();
@@ -1039,19 +1058,19 @@
                 url:   urlToShare
             };
 
-            // Mobile: use native share sheet
-            if (isTouch && navigator.share) {
+            // Try native share sheet — opens OS share dialog on Windows/macOS/Android/iOS
+            if (navigator.share) {
                 try {
                     await navigator.share(shareData);
                     updateStatus("تمت المشاركة 🤍", "info", 2000);
                     return;
                 } catch(e) {
                     if (e.name === 'AbortError') return; // user dismissed — fine
-                    // Fall through to clipboard if share fails
+                    // Fall through to clipboard if share API fails
                 }
             }
 
-            // Desktop (or mobile share fallback): copy to clipboard
+            // Clipboard API (all modern browsers including desktop Chrome/Firefox/Edge)
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 try {
                     await navigator.clipboard.writeText(urlToShare);
@@ -1060,28 +1079,22 @@
                 } catch(e) { /* fall through */ }
             }
 
-            // Last resort — works on every browser including old IE/Edge
+            // Legacy execCommand fallback (old Edge, IE, non-secure contexts)
             try {
-                const success = document.execCommand
-                    ? (() => {
-                        const ta = document.createElement('textarea');
-                        ta.value = urlToShare;
-                        ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
-                        document.body.appendChild(ta);
-                        ta.select();
-                        const ok = document.execCommand('copy');
-                        document.body.removeChild(ta);
-                        return ok;
-                    })()
-                    : false;
-                if (success) {
-                    updateStatus("تم نسخ الرابط للحافظة ✓", "info", 2000);
-                } else {
-                    window.prompt("انسخ الرابط:", urlToShare);
+                if (document.execCommand) {
+                    const ta = document.createElement('textarea');
+                    ta.value = urlToShare;
+                    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    const ok = document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    if (ok) { updateStatus("تم نسخ الرابط للحافظة ✓", "info", 2000); return; }
                 }
-            } catch(e) {
-                window.prompt("انسخ الرابط:", urlToShare);
-            }
+            } catch(e) { /* fall through */ }
+
+            // Last resort — prompt so user can copy manually
+            window.prompt("انسخ الرابط:", urlToShare);
         }
 
         // ============================================================
@@ -1092,12 +1105,22 @@
             toggleBtn.addEventListener('click', handleToggle);
             playButton.addEventListener('click', handleToggle);
 
-            // Keyboard spacebar (desktop)
+            // Keyboard spacebar (desktop) — fires from body focus
             document.addEventListener('keydown', e => {
                 if (e.code === 'Space' && e.target === document.body) {
                     e.preventDefault();
                     handleToggle();
                 }
+            });
+
+            // Enter key on focused toggleBtn or playButton (keyboard / assistive tech)
+            [toggleBtn, playButton].forEach(el => {
+                el.addEventListener('keydown', e => {
+                    if (e.code === 'Enter' || e.code === 'Space') {
+                        e.preventDefault();
+                        handleToggle();
+                    }
+                });
             });
 
             // PWA Install
