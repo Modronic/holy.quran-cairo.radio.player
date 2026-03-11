@@ -9,6 +9,7 @@
 
 A beautiful, minimalist web application for listening to the Holy Quran in radio style, streaming live from Cairo. Built with pure HTML, CSS, and JavaScript — **zero dependencies**, **single HTML file**, **respectful design**.
 
+بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
 > "وَإِذَا قُرِئَ الْقُرْآنُ فَاسْتَمِعُوا لَهُ وَأَنْصِتُوا لَعَلَّكُمْ تُرْحَمُونَ"
 > — سورة الأعراف، الآية ٢٠٤
 
@@ -189,7 +190,6 @@ MIT — use freely, fork respectfully.
 
 <div align="center">
 
-بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
 
 *Made with care for the listeners of the Holy Quran*
 
