@@ -591,7 +591,7 @@
                     adhanShownFor  = '';
                     const info     = getNextPrayer(prayerTimings);
                     nextPrayerName = info.name;
-                    nextPrayerTime = info.time;
+                    nextPrayerTime = info.time.split(' ')[0]; // strip e.g. ' (EET)' suffix
                     scheduleMidnightReload();
                 } else {
                     prayerCountdown.textContent = "غير متاح";
@@ -652,10 +652,10 @@
                 {name:'العشاء', time:t.Isha}
             ];
             for (const p of list) {
-                const [h,m] = p.time.split(':').map(Number);
-                if (h * 60 + m > cur) return {name: p.name, time: p.time};
+                const [h,m] = p.time.split(' ')[0].split(':').map(Number);
+                if (h * 60 + m > cur) return {name: p.name, time: p.time.split(' ')[0]};
             }
-            return {name:'الفجر (غدًا)', time: t.Fajr};
+            return {name:'الفجر (غدًا)', time: t.Fajr.split(' ')[0]};
         }
 
         function updatePrayerCountdown() {
@@ -670,7 +670,7 @@
             const todayCairo      = new Date(nowCairo);
             todayCairo.setUTCHours(0, 0, 0, 0);
 
-            const [h, m] = nextPrayerTime.split(':').map(Number);
+            const [h, m] = nextPrayerTime.split(' ')[0].split(':').map(Number);
             const prayerUTC = todayCairo.getTime() + (h * 60 + m) * 60000;
             // If prayer time already passed today in Cairo, use tomorrow
             const targetUTC = prayerUTC > nowUTC ? prayerUTC : prayerUTC + 86400000;
@@ -1141,71 +1141,28 @@
         function handleShare() {
             if (!canAct(lastShareClickTime, 2000)) return;
             lastShareClickTime = Date.now();
-
             const url = SHARE_URL;
 
-            // ── Step 1: Copy to clipboard RIGHT NOW, synchronously ─────────────
-            // Done first, inside the click handler, before any async call.
-            // This is the only 100% reliable clipboard method on all browsers.
-            // execCommand works here because we are still in the synchronous
-            // click event — NOT in an async/await chain like before.
-            let copied = false;
-            try {
-                const ta = document.createElement('textarea');
-                ta.value = url;
-                ta.setAttribute('readonly', '');
-                ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none';
-                document.body.appendChild(ta);
-                ta.focus();
-                ta.select();
-                ta.setSelectionRange(0, 99999);
-                copied = document.execCommand('copy');
-                document.body.removeChild(ta);
-            } catch(e) {}
-
-            // ── Step 2: Open native share sheet on top ─────────────────────────
-            // Android → OS share sheet with every installed app + contacts.
-            // iOS Safari → iOS share sheet.
-            // Windows 10/11 Chrome/Edge → Windows share dialog.
-            // macOS Safari/Chrome/Edge → macOS share sheet.
-            // If the browser supports it, the sheet opens AND clipboard is already done.
-            if (typeof navigator.share === 'function') {
+            // Touch devices (phones, tablets): native OS share sheet
+            const isTouch = window.matchMedia('(hover:none) and (pointer:coarse)').matches;
+            if (isTouch && typeof navigator.share === 'function') {
                 navigator.share({ title: 'Sakeena FM', url: url })
-                    .then(() => {
-                        updateStatus('تمت المشاركة 🤍', 'info', 2500);
-                    })
-                    .catch(err => {
-                        if (err.name === 'AbortError') {
-                            // User dismissed the sheet — clipboard was already copied
-                            if (copied) updateStatus('تم نسخ الرابط ✓', 'info', 2000);
-                            return;
-                        }
-                        // Share API exists but failed entirely → show clipboard result
-                        if (copied) {
-                            updateStatus('تم نسخ الرابط ✓ — الصقه أينما تريد', 'info', 3000);
-                        } else {
-                            // Clipboard also failed (very rare) → async clipboard last try
-                            navigator.clipboard && navigator.clipboard.writeText(url)
-                                .then(() => updateStatus('تم نسخ الرابط ✓', 'info', 3000))
-                                .catch(() => window.prompt('انسخ الرابط:', url));
-                        }
-                    });
+                    .then(() => updateStatus('تمت المشاركة 🤍', 'info', 2500))
+                    .catch(e => { if (e.name !== 'AbortError') _copyToClipboard(url); });
                 return;
             }
 
-            // ── Step 3: No share API at all (Firefox desktop, Linux, old browsers)
-            // Clipboard was already copied in Step 1 — just confirm it.
-            if (copied) {
-                updateStatus('تم نسخ الرابط ✓ — الصقه أينما تريد', 'info', 3000);
+            // Desktop / everything else: clipboard
+            _copyToClipboard(url);
+        }
+
+        function _copyToClipboard(url) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url)
+                    .then(() => updateStatus('تم نسخ الرابط ✓', 'info', 2500))
+                    .catch(() => window.prompt('انسخ الرابط:', url));
             } else {
-                // execCommand failed too (non-secure context etc) — async clipboard
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(url)
-                        .then(() => updateStatus('تم نسخ الرابط ✓', 'info', 3000))
-                        .catch(() => window.prompt('انسخ الرابط:', url));
-                } else {
-                    window.prompt('انسخ الرابط:', url);
-                }
+                window.prompt('انسخ الرابط:', url);
             }
         }
 
