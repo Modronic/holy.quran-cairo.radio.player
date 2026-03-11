@@ -1121,55 +1121,60 @@
         }
 
         // ============================================================
-        // SHARE — Native OS share dialog everywhere it exists,
-        // clean clipboard fallback everywhere else.
-        // NO execCommand — it breaks on RTL pages and copies random content.
+        // SHARE
+        // Path 1 — navigator.share:  native OS share sheet
+        //   Windows 10/11 (Chrome/Edge), macOS (Safari/Chrome/Edge),
+        //   Android (all browsers), iOS (Safari/Chrome), Samsung Internet,
+        //   some smart TVs and watches that expose the Web Share API
+        // Path 2 — clipboard.writeText: silent URL copy, confirmation toast
+        //   Firefox desktop, Linux, any browser on HTTPS without share API
+        // Path 3 — in-page URL display: zero-permission last resort,
+        //   no prompt(), no alert(), no random text, just the URL
+        //
+        // RULES:
+        //  • shareData has NO text field — some platforms copy text not URL
+        //  • navigator.canShare is NOT checked — absent on some browsers
+        //    that fully support navigator.share, causing false-negative skip
+        //  • Path is decided synchronously before any await so the browser's
+        //    user-gesture token is never consumed before clipboard is called
         // ============================================================
         async function handleShare() {
             if (!canAct(lastShareClickTime, 2000)) return;
             lastShareClickTime = Date.now();
 
-            // URL is always the canonical deployed URL — never window.location
-            // which could be a file:// path, raw GitHub URL, or localhost
             const url = SHARE_URL;
 
-            const shareData = {
-                title: 'Sakeena FM',
-                text:  'استمع إلى القرآن الكريم من القاهرة — بث مباشر مجاني',
-                url:   url
-            };
-
-            // ── Path 1: Native OS share sheet ─────────────────────────────────
-            // Works on: Android (all browsers), iOS Safari, iOS Chrome,
-            //           Windows 10/11 Chrome/Edge, macOS Chrome/Safari/Edge
-            // Does NOT fire on: Firefox desktop, Linux, old Windows
-            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+            // ── Path 1: Native OS share sheet ────────────────────────────────
+            if (navigator.share) {
                 try {
-                    await navigator.share(shareData);
+                    // title + url only — no text field
+                    // text causes Windows share → Copy to copy the sentence not the URL
+                    await navigator.share({ title: 'Sakeena FM', url });
                     updateStatus('تمت المشاركة 🤍', 'info', 2500);
                     return;
                 } catch(e) {
-                    // AbortError = user closed the dialog — normal, do nothing
-                    if (e.name === 'AbortError') return;
-                    // Any other error → fall through to clipboard
+                    if (e.name === 'AbortError') return; // user dismissed — fine
+                    // share failed (NotAllowedError, NotSupportedError etc) → clipboard
                 }
             }
 
-            // ── Path 2: Clipboard API ──────────────────────────────────────────
-            // Works on: all modern browsers in a secure context (https://)
-            // Covers: Firefox desktop, Linux, older macOS, Samsung Internet
+            // ── Path 2: Clipboard ─────────────────────────────────────────────
+            // Called as a plain .then() chain, not after an await, so the
+            // user-gesture token is still valid for browsers that require it
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                try {
-                    await navigator.clipboard.writeText(url);
-                    updateStatus('تم نسخ الرابط ✓', 'info', 2500);
-                    return;
-                } catch(e) { /* permission denied → fall through */ }
+                navigator.clipboard.writeText(url)
+                    .then(() => updateStatus('تم نسخ الرابط ✓', 'info', 2500))
+                    .catch(() => _shareShowUrl(url));
+                return;
             }
 
-            // ── Path 3: prompt() ──────────────────────────────────────────────
-            // Last resort for very old browsers / restricted contexts.
-            // Shows URL in a selectable input — user copies manually.
-            window.prompt('انسخ الرابط:', url);
+            // ── Path 3: Show URL in status bar ────────────────────────────────
+            // No prompt(), no alert() — just display the URL so user can copy it
+            _shareShowUrl(url);
+        }
+
+        function _shareShowUrl(url) {
+            updateStatus(url, 'info', 8000);
         }
 
         // ============================================================
