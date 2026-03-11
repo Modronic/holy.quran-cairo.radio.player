@@ -1143,9 +1143,8 @@
             lastShareClickTime = Date.now();
             const url = SHARE_URL;
 
-            // Touch devices (phones, tablets): native OS share sheet
-            const isTouch = window.matchMedia('(hover:none) and (pointer:coarse)').matches;
-            if (isTouch && typeof navigator.share === 'function') {
+            // Native OS share sheet — works on Windows/macOS/Android/iOS
+            if (typeof navigator.share === 'function') {
                 navigator.share({ title: 'Sakeena FM', url: url })
                     .then(() => updateStatus('تمت المشاركة 🤍', 'info', 2500))
                     .catch(e => { if (e.name !== 'AbortError') _copyToClipboard(url); });
