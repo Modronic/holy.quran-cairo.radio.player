@@ -20,12 +20,12 @@ A beautiful, minimalist web application for listening to the Holy Quran in radio
 |---------|-------------|
 | **Pure Vanilla** | Zero frameworks, zero dependencies — single HTML file |
 | **Beautiful UI** | Sacred ۞ symbol with breathing animations, glassmorphism design |
-| **Smart Streams** | Primary + 2 backup streams with automatic failover |
+| **Smart Streams** | Primary + 3 backup streams with automatic failover |
 | **Respectful UX** | Clean interface focused on Quranic listening experience |
 | **Mobile Perfect** | Works flawlessly on iOS, Android, all browsers |
 | **PWA Ready** | Install on home screen for background playback |
 | **Console Clean** | Zero errors or warnings in production |
-| **Lightweight** | ~46KB total — loads in under 1 second |
+| **Lightweight** | ~KB total — loads in under 1 second |
 
 ---
 
@@ -51,11 +51,4 @@ A beautiful, minimalist web application for listening to the Holy Quran in radio
 
 ### For Developers
 1. Fork this repository
-2. Replace stream URLs in `index.html`:
-
-```javascript
-const STREAM_URLS = [
-    "YOUR_PRIMARY_STREAM_URL_HERE",
-    "YOUR_BACKUP_STREAM_URL_1_HERE",
-    "YOUR_BACKUP_STREAM_URL_2_HERE"
-];
+2. Replace stream URLs in "
