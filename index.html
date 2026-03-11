@@ -1138,31 +1138,154 @@
         //  • Path is decided synchronously before any await so the browser's
         //    user-gesture token is never consumed before clipboard is called
         // ============================================================
+        // SHARE — 4-tier universal waterfall
+        //
+        // Tier 1 — navigator.share
+        //   Native OS share sheet. Works on: Windows 10/11 Chrome/Edge,
+        //   macOS Safari/Chrome/Edge, Android all browsers, iOS Safari/Chrome,
+        //   Samsung Internet, smart TVs/watches that expose Web Share API.
+        //   Requires user gesture (already guaranteed by click handler).
+        //
+        // Tier 2 — navigator.clipboard.writeText
+        //   Modern async clipboard API. Works on: Firefox desktop, Linux,
+        //   any HTTPS context with Clipboard API (Chrome 66+, Safari 13.1+).
+        //
+        // Tier 3 — document.execCommand('copy') via hidden textarea
+        //   Legacy synchronous clipboard. Works on: iOS Safari 10-13,
+        //   Android Chrome 43-65, old Samsung Internet, IE11, any browser
+        //   that predates the async Clipboard API.
+        //
+        // Tier 4 — In-page URL overlay (zero-permission, works everywhere)
+        //   Absolute last resort. No dialogs, no permissions, no popups.
+        //   Works on: all WebViews, smartwatches, embedded browsers,
+        //   anything that blocks window.prompt or clipboard.
+        //   Shows the URL in a tappable bar the user can copy manually.
+        // ============================================================
         function handleShare() {
             if (!canAct(lastShareClickTime, 2000)) return;
             lastShareClickTime = Date.now();
             const url = SHARE_URL;
 
-            // Native OS share sheet — works on Windows/macOS/Android/iOS
+            // ── Tier 1: Native OS share sheet ────────────────────────
             if (typeof navigator.share === 'function') {
                 navigator.share({ title: 'Sakeena FM', url: url })
                     .then(() => updateStatus('تمت المشاركة 🤍', 'info', 2500))
-                    .catch(e => { if (e.name !== 'AbortError') _copyToClipboard(url); });
+                    .catch(e => {
+                        // AbortError = user cancelled → do nothing
+                        // Any other error → fall through to clipboard
+                        if (e.name !== 'AbortError') _copyToClipboard(url);
+                    });
                 return;
             }
 
-            // Desktop / everything else: clipboard
+            // ── Tiers 2-4: clipboard chain ────────────────────────────
             _copyToClipboard(url);
         }
 
         function _copyToClipboard(url) {
+            // ── Tier 2: Modern async Clipboard API ───────────────────
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(url)
                     .then(() => updateStatus('تم نسخ الرابط ✓', 'info', 2500))
-                    .catch(() => window.prompt('انسخ الرابط:', url));
-            } else {
-                window.prompt('انسخ الرابط:', url);
+                    .catch(() => _execCommandCopy(url));
+                return;
             }
+            // ── Tiers 3-4: legacy path ────────────────────────────────
+            _execCommandCopy(url);
+        }
+
+        function _execCommandCopy(url) {
+            // ── Tier 3: execCommand — old iOS/Android/Samsung ─────────
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = url;
+                // Keep it off-screen but selectable (display:none blocks execCommand)
+                ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                // setSelectionRange for iOS
+                ta.setSelectionRange(0, url.length);
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                if (ok) { updateStatus('تم نسخ الرابط ✓', 'info', 2500); return; }
+            } catch (_) { /* fall through */ }
+
+            // ── Tier 4: In-page URL overlay ───────────────────────────
+            _showShareOverlay(url);
+        }
+
+        function _showShareOverlay(url) {
+            // Remove any existing overlay first
+            const old = document.getElementById('shareOverlay');
+            if (old) old.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'shareOverlay';
+            overlay.style.cssText = [
+                'position:fixed','bottom:90px','left:50%','transform:translateX(-50%)',
+                'background:#1a1a2e','border:1px solid rgba(255,255,255,0.18)',
+                'border-radius:12px','padding:12px 14px','z-index:9999',
+                'display:flex','align-items:center','gap:8px',
+                'box-shadow:0 4px 24px rgba(0,0,0,0.6)',
+                'max-width:90vw','min-width:260px'
+            ].join(';');
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = url;
+            input.readOnly = true;
+            input.style.cssText = [
+                'flex:1','background:rgba(255,255,255,0.08)','border:none',
+                'color:#e8e8e8','font-size:12px','padding:6px 8px',
+                'border-radius:6px','outline:none','min-width:0',
+                'font-family:monospace'
+            ].join(';');
+
+            const btn = document.createElement('button');
+            btn.textContent = 'نسخ';
+            btn.style.cssText = [
+                'background:rgba(255,255,255,0.15)','border:none','color:#e8e8e8',
+                'padding:6px 12px','border-radius:6px','cursor:pointer',
+                'font-size:13px','white-space:nowrap','flex-shrink:0'
+            ].join(';');
+
+            const close = document.createElement('button');
+            close.textContent = '✕';
+            close.style.cssText = [
+                'background:none','border:none','color:rgba(255,255,255,0.5)',
+                'padding:4px 6px','cursor:pointer','font-size:14px','flex-shrink:0'
+            ].join(';');
+
+            const dismiss = () => { overlay.remove(); };
+
+            btn.addEventListener('click', () => {
+                input.select();
+                input.setSelectionRange(0, url.length);
+                try {
+                    document.execCommand('copy');
+                    btn.textContent = '✓';
+                    setTimeout(() => { btn.textContent = 'نسخ'; }, 1500);
+                } catch(_) {}
+            });
+
+            close.addEventListener('click', dismiss);
+            // Auto-dismiss after 8 seconds
+            setTimeout(dismiss, 8000);
+
+            overlay.appendChild(input);
+            overlay.appendChild(btn);
+            overlay.appendChild(close);
+            document.body.appendChild(overlay);
+
+            // Auto-select on open so the user can copy with keyboard too
+            setTimeout(() => {
+                input.focus();
+                input.select();
+                input.setSelectionRange(0, url.length);
+            }, 50);
+
+            updateStatus('انسخ الرابط 👆', 'info', 4000);
         }
 
         // ============================================================
