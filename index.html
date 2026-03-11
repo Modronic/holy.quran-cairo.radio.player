@@ -1241,7 +1241,39 @@
             });
 
             // Refresh
-            refreshBtn.addEventListener('click', () => location.reload());
+            refreshBtn.addEventListener('click', () => {
+                // Full cache nuke — clears everything then hard reloads
+                const wipe = [];
+
+                // 1. localStorage
+                try { localStorage.clear(); } catch(e) {}
+
+                // 2. sessionStorage
+                try { sessionStorage.clear(); } catch(e) {}
+
+                // 3. All Cache Storage entries (service workers, PWA caches)
+                if (window.caches) {
+                    wipe.push(
+                        caches.keys().then(keys =>
+                            Promise.all(keys.map(k => caches.delete(k)))
+                        )
+                    );
+                }
+
+                // 4. Unregister any service workers
+                if (navigator.serviceWorker) {
+                    wipe.push(
+                        navigator.serviceWorker.getRegistrations().then(regs =>
+                            Promise.all(regs.map(r => r.unregister()))
+                        )
+                    );
+                }
+
+                // 5. Hard reload — bypasses browser cache (same as Ctrl+Shift+R)
+                Promise.allSettled(wipe).then(() => {
+                    location.href = location.href.split('?')[0] + '?v=' + Date.now();
+                });
+            });
 
             // WhatsApp banner dismiss
             const whatsappDismissBtn = document.getElementById('whatsappDismissBtn');
