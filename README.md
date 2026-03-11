@@ -1,9 +1,9 @@
 # 🌙 Sakeena FM — Cairo Quran Radio, Live
 
-**Live from Cairo, Egypt · Idha'at Al-Quran Al-Karim**
+**Live from Cairo, Egypt · Currently streaming "Idha'at Al-Quran Al-Karim"**
 
 ![Status](https://img.shields.io/badge/status-live-brightgreen?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-1.0.10-gold?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.0-gold?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
 ![Zero Dependencies](https://img.shields.io/badge/dependencies-zero-purple?style=for-the-badge)
 
