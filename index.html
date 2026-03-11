@@ -1138,43 +1138,40 @@
         //  • Path is decided synchronously before any await so the browser's
         //    user-gesture token is never consumed before clipboard is called
         // ============================================================
-        async function handleShare() {
+        // NOT async — keeps the user-gesture token alive all the way
+        // through to clipboard if navigator.share isn't available or fails.
+        function handleShare() {
             if (!canAct(lastShareClickTime, 2000)) return;
             lastShareClickTime = Date.now();
 
             const url = SHARE_URL;
 
-            // ── Path 1: Native OS share sheet ────────────────────────────────
-            if (navigator.share) {
-                try {
-                    // title + url only — no text field
-                    // text causes Windows share → Copy to copy the sentence not the URL
-                    await navigator.share({ title: 'Sakeena FM', url });
-                    updateStatus('تمت المشاركة 🤍', 'info', 2500);
-                    return;
-                } catch(e) {
-                    if (e.name === 'AbortError') return; // user dismissed — fine
-                    // share failed (NotAllowedError, NotSupportedError etc) → clipboard
-                }
-            }
-
-            // ── Path 2: Clipboard ─────────────────────────────────────────────
-            // Called as a plain .then() chain, not after an await, so the
-            // user-gesture token is still valid for browsers that require it
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url)
-                    .then(() => updateStatus('تم نسخ الرابط ✓', 'info', 2500))
-                    .catch(() => _shareShowUrl(url));
+            // ── Path 1: Native OS share sheet ─────────────────────────────────
+            // Works: Android, iOS, Windows 10/11 (Chrome/Edge), macOS (Safari/Chrome/Edge)
+            // Does NOT apply: Firefox desktop, Linux
+            // .then/.catch pattern — never awaited — user gesture stays valid below
+            if (typeof navigator.share === 'function') {
+                navigator.share({ title: 'Sakeena FM', url: url })
+                    .then(() => updateStatus('تمت المشاركة 🤍', 'info', 2500))
+                    .catch(err => {
+                        if (err.name === 'AbortError') return; // user closed dialog — fine
+                        _copyUrl(url); // share API failed → clipboard
+                    });
                 return;
             }
 
-            // ── Path 3: Show URL in status bar ────────────────────────────────
-            // No prompt(), no alert() — just display the URL so user can copy it
-            _shareShowUrl(url);
+            // ── Path 2 + 3: No share API (Firefox, Linux, old browsers) ───────
+            _copyUrl(url);
         }
 
-        function _shareShowUrl(url) {
-            updateStatus(url, 'info', 8000);
+        function _copyUrl(url) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url)
+                    .then(() => updateStatus('تم نسخ الرابط ✓ — الصقه أينما تريد', 'info', 3000))
+                    .catch(() => window.prompt('انسخ الرابط:', url));
+            } else {
+                window.prompt('انسخ الرابط:', url);
+            }
         }
 
         // ============================================================
