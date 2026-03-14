@@ -1,4 +1,4 @@
-# 🌙 Holy Quran Radio PLayer — Cairo Quran Radio, Live
+# 🌙 Holy Quran Radio Player
 
 **Live from Cairo, Egypt · Currently streaming "Idha'at Al-Quran Al-Karim"**
 
